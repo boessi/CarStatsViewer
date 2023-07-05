@@ -922,7 +922,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                         else -> PlotLabelPosition.NONE
                     }
 
-                    if (dimensionY != null && index++ > 0) continue
+                    if (labelPosition != PlotLabelPosition.RIGHT && index++ > 0) continue
 
                     val dataPoints = line.getDataPoints(dimension, dimensionRestriction, dimensionShift)
                     val configuration = when {
