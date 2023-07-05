@@ -285,7 +285,7 @@ class PlotLine(
                 }
             }
             PlotHighlightMethod.AVG_BY_TIME -> {
-                val filteredAverageMethod = filtered.filter { (it.TimeDelta ?: 0f) != 0f  }
+                val filteredAverageMethod = filtered.filter { (it.TimeDelta ?: 0L) != 0L  }
                 val value = filteredAverageMethod.map { (it.TimeDelta ?: 0L) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
                 val distance = filteredAverageMethod.sumOf { (it.TimeDelta ?: 0L) }
 

@@ -46,7 +46,13 @@ object PlotGlobalConfiguration {
                 PlotHighlightMethod.AVG_BY_TIME,
                 "m",
                 SessionGapRendering = PlotSessionGapRendering.GAP
-            )
+            ),
+            PlotDimensionY.CONSUMPTION to PlotLineConfiguration(
+                PlotRange(-300f, 900f, -300f, 900f, 100f, 0f),
+                PlotLineLabelFormat.NUMBER,
+                PlotHighlightMethod.AVG_BY_DISTANCE,
+                "Wh/km"
+            ),
         )
 
     fun updateDistanceUnit(distanceUnit: DistanceUnitEnum) {
