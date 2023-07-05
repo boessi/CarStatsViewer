@@ -197,6 +197,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
             consumptionPlotLine.Configuration.Divider = appPreferences.distanceUnit.toFactor() * 10f
         }
 
+        summary_consumption_plot.dimensionYPrimary = PlotDimensionY.CONSUMPTION
         summary_consumption_plot.dimension = PlotDimensionX.DISTANCE
         summary_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(
             MainActivity.DISTANCE_TRIP_DIVIDER)
