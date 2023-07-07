@@ -75,6 +75,12 @@ class DataProcessor {
             _realTimeDataFlow.value = value
         }
 
+    var deltaData = DeltaData()
+        private set(value) {
+            field = value
+            _deltaDataFlow.value = value
+        }
+
     // private var chargingTripData = ChargingTripData()
     //     set(value) {
     //         field = value
@@ -83,7 +89,9 @@ class DataProcessor {
 
 
     private val _realTimeDataFlow = MutableStateFlow(realTimeData)
+    private val _deltaDataFlow = MutableStateFlow(deltaData)
     val realTimeDataFlow = _realTimeDataFlow.asStateFlow()
+    val deltaDataFlow = _deltaDataFlow.asStateFlow();
 
     private val _selectedSessionDataFlow = MutableStateFlow<DrivingSession?>(null)
     val selectedSessionDataFlow = _selectedSessionDataFlow.asStateFlow()
@@ -235,6 +243,7 @@ class DataProcessor {
             //if (timestampSynchronizer.getSystemTimeFromNanosTimestamp(carPropertiesData.CurrentPower.timestamp) < System.currentTimeMillis() - 500) {
         if (carPropertiesData.CurrentPower.timestamp < System.nanoTime() - 500_000_000) {
             InAppLogger.w("[NEO] Dropped power value, timestamp too old. Time delta: ${(System.nanoTime() - carPropertiesData.CurrentPower.timestamp)/1_000_000}")
+            deltaData = deltaData.copy( powerUsed = null, timeSpanPower = null );
             return
         }
         // }
@@ -243,6 +252,7 @@ class DataProcessor {
             val energyDelta = emulatorPowerSign * (carPropertiesData.CurrentPower.value as Float) / 1_000f * (carPropertiesData.CurrentPower.timeDelta / 3.6E12)
             pointUsedEnergy += energyDelta
             valueUsedEnergy += energyDelta
+            deltaData = deltaData.copy( powerUsed = energyDelta, timeSpanPower = carPropertiesData.CurrentPower.timeDelta );
 
             // if (realTimeData.drivingState == DrivingState.CHARGE) {
             //     if (pointUsedEnergy.absoluteValue > Defines.PLOT_ENERGY_INTERVAL)
@@ -574,7 +584,7 @@ class DataProcessor {
             //     InAppLogger.w("[NEO] Power value is too old!")
             } else {
                 // while ((!emulatorMode && timestampSynchronizer.getSystemTimeFromNanosTimestamp(carPropertiesData.CurrentPower.timestamp) < System.currentTimeMillis() - 500) || (emulatorMode && timestampSynchronizer.getSystemTimeFromNanosTimestamp(carPropertiesData.CurrentSpeed.timestamp) < System.currentTimeMillis() - 500)) {
-                while ((!emulatorMode && carPropertiesData.CurrentPower.timestamp < System.nanoTime() - 500_000_000) || (emulatorMode && carPropertiesData.CurrentSpeed.timestamp < System.nanoTime() - 500_000_000)) {
+                  while ((!emulatorMode && carPropertiesData.CurrentPower.timestamp < System.nanoTime() - 500_000_000) || (emulatorMode && carPropertiesData.CurrentSpeed.timestamp < System.nanoTime() - 500_000_000)) {
                     InAppLogger.w("[NEO] Power value is too old!")
                     delay(250)
                 }
