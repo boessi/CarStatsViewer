@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -33,6 +34,8 @@ class DataProcessor {
 
     private var pointDrivenDistance: Double = 0.0
     private var pointUsedEnergy: Double = 0.0
+    private var pointTime: Long = 0L
+
     private var valueDrivenDistance: Double = 0.0
     private var valueUsedEnergy: Double = 0.0
 
@@ -213,6 +216,7 @@ class DataProcessor {
             val distanceDelta = (carPropertiesData.CurrentSpeed.value as Float).absoluteValue * (carPropertiesData.CurrentSpeed.timeDelta / 1_000_000_000f)
             pointDrivenDistance += distanceDelta
             valueDrivenDistance += distanceDelta
+            pointTime += carPropertiesData.CurrentSpeed.timeDelta
 
             val speedToOrFromZero = when {
                 carPropertiesData.CurrentSpeed.value as Float == 0f && carPropertiesData.CurrentSpeed.lastValue as Float != 0f -> true
@@ -220,7 +224,7 @@ class DataProcessor {
                 else -> false
             }
 
-            if (pointDrivenDistance >= Defines.PLOT_DISTANCE_INTERVAL || speedToOrFromZero) {
+            if (pointDrivenDistance >= Defines.PLOT_DISTANCE_INTERVAL || speedToOrFromZero || TimeUnit.NANOSECONDS.toSeconds(pointTime) > 5) {
                 updateDrivingDataPoint()
             }
 
@@ -441,6 +445,8 @@ class DataProcessor {
         pointUsedEnergy = 0.0
         val mDrivenDistance = pointDrivenDistance
         pointDrivenDistance = 0.0
+
+        pointTime = 0L
 
         updateTripDataValues(DrivingState.DRIVE) // let's put this outside of the coroutine in the hope of fixing this stupid difference between point and trip values...
 
