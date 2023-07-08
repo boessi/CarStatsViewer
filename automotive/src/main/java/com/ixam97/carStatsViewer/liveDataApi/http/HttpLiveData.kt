@@ -139,6 +139,9 @@ class HttpLiveData (
         connectionStatus = try {
             send(
                 HttpDataSet(
+                    apiVersion = 2,
+                    appVersion = BuildConfig.VERSION_NAME,
+
                     timestamp = System.currentTimeMillis(),
                     speed = realTimeData.speed!!,
                     power = realTimeData.power!!,
@@ -153,7 +156,7 @@ class HttpLiveData (
                     alt = realTimeData.alt,
 
                     // ABRP debug
-                    abrpPackage = (CarStatsViewer.liveDataApis[0] as AbrpLiveData).lastPackage,
+                    abrpPackage = if (CarStatsViewer.appPreferences.httpLiveDataSendABRPDataset) (CarStatsViewer.liveDataApis[0] as AbrpLiveData).lastPackage else null,
 
                     // Session Data
                     drivingSession?.driving_session_id,
@@ -172,13 +175,7 @@ class HttpLiveData (
                     deltaData?.powerUsed,
                     deltaData?.traveledDistance,
                     deltaData?.timeSpanPower,
-                    deltaData?.timeSpanDistance,
-
-                    // ABRP debug
-                    abrpPackage = if (CarStatsViewer.appPreferences.httpLiveDataSendABRPDataset) (CarStatsViewer.liveDataApis[0] as AbrpLiveData).lastPackage else null,
-
-                    appVersion = BuildConfig.VERSION_NAME,
-                    apiVersion = 2
+                    deltaData?.timeSpanDistance
                 )
             )
         } catch (e: java.lang.Exception) {
