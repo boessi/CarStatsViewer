@@ -146,7 +146,6 @@ class MainActivity : FragmentActivity() {
                     // InAppLogger.v("Real time data: $it")
 
                     if (it.isInitialized()) {
-
                         neoChargePortConnected = it.chargePortConnected!!
 
                         val instCons = it.instConsumption
@@ -456,8 +455,8 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun updateConnectionStatusIcon(apiStatus: Map<String, Int>) {
-        if (apiStatus.containsKey(CarStatsViewer.liveDataApis[0].broadcastAction)) {
-            val status = apiStatus[CarStatsViewer.liveDataApis[0].broadcastAction]
+        if (apiStatus.containsKey(CarStatsViewer.liveDataApis[0].apiIdentifier)) {
+            val status = apiStatus[CarStatsViewer.liveDataApis[0].apiIdentifier]
 
             when (status) {
                 WatchdogState.DISABLED -> main_icon_abrp_status.visibility = View.GONE
