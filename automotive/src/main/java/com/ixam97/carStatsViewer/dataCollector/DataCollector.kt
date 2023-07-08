@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.*
 class DataCollector: Service() {
 
     companion object {
-        const val LIVE_DATA_TASK_INTERVAL = 5_000L
+        const val LIVE_DATA_TASK_INTERVAL = 5_000
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -147,16 +147,16 @@ class DataCollector: Service() {
         }
 
         if (CarStatsViewer.appPreferences.autostart)
-            CarStatsViewer.setupRestartAlarm(CarStatsViewer.appContext, "termination", 10_000)
+            CarStatsViewer.setupRestartAlarm(CarStatsViewer.appContext, "termination", 10_000, extendedLogging = true)
 
         serviceScope.launch {
             CarStatsViewer.watchdog.watchdogTriggerFlow.collect {
-                InAppLogger.i("[Watchdog] Watchdog triggered")
+                InAppLogger.d("[Watchdog] Watchdog triggered")
 
                 /** Check if location client has crashed or needs to be stopped or started */
                 var locationState = WatchdogState.DISABLED
                 if (CarStatsViewer.appPreferences.useLocation) {
-                    locationState = if (watchdogLocation == lastLocation || locationClientJob == null) {
+                    locationState = if (watchdogLocation == lastLocation || locationClientJob == null || lastLocation == null) {
                         InAppLogger.w("[Watchdog] Location error!")
                         startLocationClient(5_000)
                         WatchdogState.ERROR
@@ -193,6 +193,8 @@ class DataCollector: Service() {
         InAppLogger.i("[NEO] Location client is being canceled")
         locationClientJob?.cancel()
         locationClientJob = null
+        dataProcessor.processLocation(null, null, null)
+        lastLocation = null
     }
 
     private fun startLocationClient(interval: Long) {
@@ -201,11 +203,11 @@ class DataCollector: Service() {
         locationClientJob?.cancel()
         locationClientJob = locationClient.getLocationUpdates(interval)
             .catch { e ->
-                InAppLogger.e("[NEO] LocationClient: ${e.message}")
+                InAppLogger.e("[LOC] ${e.message}")
             }
             .onEach { location ->
                 if (location != null) {
-                    InAppLogger.v("[NEO] %.2f, %.2f, %.0fm, time: %d".format(location.latitude, location.longitude, location.altitude, location.time))
+                    // InAppLogger.v("[NEO] %.2f, %.2f, %.0fm, time: %d".format(location.latitude, location.longitude, location.altitude, location.time))
                     dataProcessor.processLocation(location.latitude, location.longitude, location.altitude)
                 } else {
                     dataProcessor.processLocation(null, null, null)
