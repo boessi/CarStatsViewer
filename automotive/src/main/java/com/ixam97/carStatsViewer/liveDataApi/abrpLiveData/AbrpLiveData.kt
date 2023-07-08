@@ -10,8 +10,10 @@ import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.appPreferences.AppPreferences
+import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.DrivingState
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
+import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import org.json.JSONObject
 import java.io.DataOutputStream
 import java.net.HttpURLConnection
@@ -160,7 +162,7 @@ class AbrpLiveData (
         tokenDialog.show()
     }
 
-    override fun sendNow(realTimeData: RealTimeData) {
+    override fun sendNow(realTimeData: RealTimeData, drivingSession: DrivingSession?, deltaData: DeltaData?) {
         if (!AppPreferences(CarStatsViewer.appContext).abrpUseApi) {
             connectionStatus = ConnectionStatus.UNUSED
             return
@@ -173,9 +175,9 @@ class AbrpLiveData (
                 speed = realTimeData.speed!!,
                 isCharging = realTimeData.chargePortConnected!!,
                 isParked = (realTimeData.drivingState == DrivingState.PARKED || realTimeData.drivingState == DrivingState.CHARGE),
-                lat = realTimeData.lat?.toDouble(),
-                lon = realTimeData.lon?.toDouble(),
-                alt = realTimeData.alt?.toDouble(),
+                lat = realTimeData.lat,
+                lon = realTimeData.lon,
+                alt = realTimeData.alt,
                 temp = realTimeData.ambientTemperature!!
             ))
         }

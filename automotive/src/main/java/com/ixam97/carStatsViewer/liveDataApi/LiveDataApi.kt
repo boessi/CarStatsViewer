@@ -3,7 +3,9 @@ package com.ixam97.carStatsViewer.liveDataApi
 import android.content.Context
 import android.os.Handler
 import com.ixam97.carStatsViewer.CarStatsViewer
+import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
+import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -47,13 +49,15 @@ abstract class LiveDataApi(
     open fun createLiveDataTask(
         // dataManager: DataManager,
         realTimeData: RealTimeData,
+        drivingSession: DrivingSession?,
+        deltaData: DeltaData?,
         handler: Handler,
         interval: Int
     ): Runnable? {
         timeout = interval
         return object : Runnable {
             override fun run() {
-                coroutineSendNow(realTimeData)
+                coroutineSendNow(realTimeData, drivingSession,deltaData)
                 handler.postDelayed(this, timeout.toLong())
             }
         }
@@ -62,19 +66,19 @@ abstract class LiveDataApi(
     /**
      * sendNow, but wrapped in a coroutine to not block main thread.
      */
-    fun coroutineSendNow(realTimeData: RealTimeData) {
+    fun coroutineSendNow(realTimeData: RealTimeData, drivingSession: DrivingSession?,deltaData: DeltaData? ) {
     //    CoroutineScope(Dispatchers.Default).launch {
-            sendNow(realTimeData)
+            sendNow(realTimeData, drivingSession,deltaData)
             updateWatchdog()
     //    }
     }
 
-    fun requestFlow(serviceScope: CoroutineScope, realTimeData: () -> RealTimeData, interval: Int): Flow<Unit> {
+    fun requestFlow(serviceScope: CoroutineScope, realTimeData: () -> RealTimeData, drivingSession: () -> DrivingSession?, deltaData: () -> DeltaData?, interval: Int): Flow<Unit> {
         timeout = interval
         originalInterval = interval
         return flow {
             while (true) {
-                coroutineSendNow(realTimeData())
+                coroutineSendNow(realTimeData(), drivingSession(),deltaData())
                 delay(timeout.toLong())
             }
         }
@@ -84,7 +88,7 @@ abstract class LiveDataApi(
      * Code to be executed in coroutineSendNow. This function should not be called outside a
      * coroutine to not block main thread.
      */
-    protected abstract fun sendNow(realTimeData: RealTimeData)
+    protected abstract fun sendNow(realTimeData: RealTimeData, drivingSession: DrivingSession?, deltaData: DeltaData?)
 
     private fun updateWatchdog() {
         val currentApiStateMap = CarStatsViewer.watchdog.getCurrentWatchdogState().apiState.toMutableMap()

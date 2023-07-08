@@ -188,17 +188,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
     }
 
     private fun setupPlots() {
-
-        if (appPreferences.consumptionUnit) {
-            consumptionPlotLine.Configuration.Unit = "Wh/%s".format(appPreferences.distanceUnit.unit())
-            consumptionPlotLine.Configuration.LabelFormat = PlotLineLabelFormat.NUMBER
-            consumptionPlotLine.Configuration.Divider = appPreferences.distanceUnit.toFactor() * 1f
-        } else {
-            consumptionPlotLine.Configuration.Unit = "kWh/100%s".format(appPreferences.distanceUnit.unit())
-            consumptionPlotLine.Configuration.LabelFormat = PlotLineLabelFormat.FLOAT
-            consumptionPlotLine.Configuration.Divider = appPreferences.distanceUnit.toFactor() * 10f
-        }
-
+        summary_consumption_plot.dimensionYPrimary = PlotDimensionY.CONSUMPTION
         summary_consumption_plot.dimension = PlotDimensionX.DISTANCE
         summary_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(
             MainActivity.DISTANCE_TRIP_DIVIDER)
