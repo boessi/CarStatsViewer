@@ -7,9 +7,11 @@ import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
 import com.google.gson.Gson
+import com.ixam97.carStatsViewer.BuildConfig
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.appPreferences.AppPreferences
+import com.ixam97.carStatsViewer.dataProcessor.IgnitionState
 import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.DrivingState
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
@@ -17,6 +19,7 @@ import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import com.ixam97.carStatsViewer.liveDataApi.LiveDataApi
 import com.ixam97.carStatsViewer.liveDataApi.abrpLiveData.AbrpLiveData
 import com.ixam97.carStatsViewer.utils.InAppLogger
+import com.ixam97.carStatsViewer.utils.StringFormatters
 import java.io.DataOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -29,6 +32,7 @@ class HttpLiveData (
     detailedLog : Boolean = true
 ): LiveDataApi("Webhook", detailedLog) {
 
+    var successCounter: Int = 0
 
     private fun addBasicAuth(connection: HttpURLConnection, username: String, password: String) {
         if (username == ""  && password == "") {
@@ -73,6 +77,7 @@ class HttpLiveData (
         val username = layout.findViewById<EditText>(R.id.http_live_data_username)
         val password = layout.findViewById<EditText>(R.id.http_live_data_password)
         val httpLiveDataEnabled = layout.findViewById<Switch>(R.id.http_live_data_enabled)
+        val abrpDebug = layout.findViewById<Switch>(R.id.http_live_data_abrp)
 
         val httpLiveDataSettingsDialog = AlertDialog.Builder(context).apply {
             setView(layout)
@@ -92,8 +97,12 @@ class HttpLiveData (
         val dialog = httpLiveDataSettingsDialog.show()
 
         httpLiveDataEnabled.isChecked = AppPreferences(context).httpLiveDataEnabled
+        abrpDebug.isChecked = AppPreferences(context).httpLiveDataSendABRPDataset
         httpLiveDataEnabled.setOnClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked
+        }
+        abrpDebug.setOnClickListener {
+            AppPreferences(context).httpLiveDataSendABRPDataset = abrpDebug.isChecked
         }
 
         url.setText(AppPreferences(context).httpLiveDataURL)
@@ -125,29 +134,23 @@ class HttpLiveData (
             return
         }
 
-        if (realTimeData.isInitialized()) {
-            connectionStatus = send(
+        if (!realTimeData.isInitialized()) return
+
+        connectionStatus = try {
+            send(
                 HttpDataSet(
                     timestamp = System.currentTimeMillis(),
-                    currentSpeed = realTimeData.speed!! * 3.6f,
-                    currentPower = realTimeData.power!! / 1_000_000f,
-                    currentGear = realTimeData.selectedGear,
-                    chargePortConnected = realTimeData.chargePortConnected,
-                    batteryLevel = realTimeData.batteryLevel,
-                    stateOfCharge =  (realTimeData.stateOfCharge!! * 100f).roundToInt(),
-                    currentIgnitionState = realTimeData.ignitionState,
-                    instConsumption = realTimeData.instConsumption,
-                    driveState = realTimeData.drivingState,
-                    ambientTemperature = realTimeData.ambientTemperature,
-                    maxBatteryLevel = realTimeData.batteryLevel,
+                    speed = realTimeData.speed!!,
+                    power = realTimeData.power!!,
+                    selectedGear = StringFormatters.getGearString(realTimeData.selectedGear!!),
+                    ignitionState = IgnitionState.nameMap[realTimeData.ignitionState!!]?:"UNKNOWN",
+                    chargePortConnected = realTimeData.chargePortConnected!!,
+                    batteryLevel = realTimeData.batteryLevel!!,
+                    stateOfCharge = realTimeData.stateOfCharge!!,
+                    ambientTemperature = realTimeData.ambientTemperature!!,
                     lat = realTimeData.lat,
                     lon = realTimeData.lon,
                     alt = realTimeData.alt,
-
-                    // Helpers
-                    isCharging = realTimeData.chargePortConnected,
-                    isParked = (realTimeData.drivingState == DrivingState.PARKED || realTimeData.drivingState == DrivingState.CHARGE),
-                    isFastCharging = (realTimeData.chargePortConnected!! && (realTimeData.power!! < -11_000_000f)),
 
                     // ABRP debug
                     abrpPackage = (CarStatsViewer.liveDataApis[0] as AbrpLiveData).lastPackage,
@@ -170,8 +173,17 @@ class HttpLiveData (
                     deltaData?.traveledDistance,
                     deltaData?.timeSpanPower,
                     deltaData?.timeSpanDistance,
+
+                    // ABRP debug
+                    abrpPackage = if (CarStatsViewer.appPreferences.httpLiveDataSendABRPDataset) (CarStatsViewer.liveDataApis[0] as AbrpLiveData).lastPackage else null,
+
+                    appVersion = BuildConfig.VERSION_NAME,
+                    apiVersion = 2
                 )
             )
+        } catch (e: java.lang.Exception) {
+            InAppLogger.e("[HTTP] Dataset error")
+            ConnectionStatus.ERROR
         }
     }
 
@@ -194,7 +206,7 @@ class HttpLiveData (
             responseCode = connection.responseCode
 
             if (detailedLog) {
-                var logString = "HTTP Webhook: Status: ${connection.responseCode}, Msg: ${connection.responseMessage}, Content:"
+                var logString = "[HTTP] Status: ${connection.responseCode}, Msg: ${connection.responseMessage}, Content:"
                 logString += try {
                     connection.inputStream.bufferedReader().use {it.readText()}
 
@@ -208,16 +220,29 @@ class HttpLiveData (
             connection.inputStream.close()
             connection.disconnect()
         } catch (e: java.net.SocketTimeoutException) {
-            InAppLogger.e("HTTP Webhook: Network timeout error")
+            InAppLogger.e("[HTTP] Network timeout error")
+            if (timeout < 30_000) {
+                timeout += 5_000
+                InAppLogger.w("[HTTP] Interval increased to $timeout ms")
+            }
+            successCounter = 0
             return ConnectionStatus.ERROR
         } catch (e: java.lang.Exception) {
-            InAppLogger.e("HTTP Webhook: Connection error")
+            InAppLogger.e("[HTTP] Connection error")
             return ConnectionStatus.ERROR
         }
 
         if (responseCode != 200) {
-            InAppLogger.e("HTTP Webhook: Transmission failed. Status code $responseCode")
+            InAppLogger.e("[HTTP] Transmission failed. Status code $responseCode")
             return ConnectionStatus.ERROR
+        }
+
+
+        successCounter++
+        if (successCounter >= 5 && timeout > originalInterval) {
+            timeout -= 5_000
+            InAppLogger.i("[HTTP] Interval decreased to $timeout ms")
+            successCounter = 0
         }
 
         return ConnectionStatus.CONNECTED
