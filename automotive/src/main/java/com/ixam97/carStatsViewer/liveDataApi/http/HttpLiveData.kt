@@ -30,7 +30,7 @@ import kotlin.math.roundToInt
 
 class HttpLiveData (
     detailedLog : Boolean = true
-): LiveDataApi("Webhook", detailedLog) {
+): LiveDataApi("Webhook", R.string.settings_apis_http, detailedLog) {
 
     var successCounter: Int = 0
 
