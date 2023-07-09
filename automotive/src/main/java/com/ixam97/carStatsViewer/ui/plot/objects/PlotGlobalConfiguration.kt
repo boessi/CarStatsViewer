@@ -11,7 +11,7 @@ object PlotGlobalConfiguration {
             PlotDimensionY.SPEED to PlotLineConfiguration(
                 PlotRange(0f, 40f, 0f, 240f, 40f),
                 PlotLineLabelFormat.NUMBER,
-                PlotHighlightMethod.AVG_BY_TIME,
+                PlotHighlightMethod.AVG_BY_VALUE,
                 "km/h",
                 DimensionSmoothing = 0.005f,
                 DimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE,
@@ -50,7 +50,7 @@ object PlotGlobalConfiguration {
             PlotDimensionY.CONSUMPTION to PlotLineConfiguration(
                 PlotRange(-300f, 900f, -300f, 900f, 100f, 0f),
                 PlotLineLabelFormat.NUMBER,
-                PlotHighlightMethod.AVG_BY_DISTANCE,
+                PlotHighlightMethod.AVG_BY_VALUE,
                 "Wh/km"
             ),
         )

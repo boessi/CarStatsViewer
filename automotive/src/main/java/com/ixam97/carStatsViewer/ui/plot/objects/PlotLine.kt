@@ -68,13 +68,7 @@ class PlotLine(
             }
         }
 
-        if (dataPoint.Marker == PlotLineMarkerType.BEGIN_SESSION) {
-            dataPoint.TimeDelta = 0L
-            dataPoint.DistanceDelta = 0f
-            dataPoint.StateOfChargeDelta = 0f
-        }
-
-        when {
+         when {
             dataPoint.Value.isFinite() -> {
                 dataPoints[dataPoints.size] = dataPoint
             }
@@ -266,7 +260,7 @@ class PlotLine(
 
     private fun averageValue(dataPoints: List<PlotLineItem>, averageMethod: PlotHighlightMethod, secondaryDimension: PlotDimensionY? = null): Float? {
         if (dataPoints.isEmpty()) return null
-        if (dataPoints.isEmpty() || dataPoints.all { (it.byDimensionY(secondaryDimension)?:0f) == 0f }) return null
+        if (dataPoints.all { (it.byDimensionY(secondaryDimension) ?: 0f) == 0f }) return null
         if (dataPoints.size == 1) return dataPoints.first().byDimensionY(secondaryDimension)
 
         val averageValue = when (averageMethod) {
@@ -297,6 +291,9 @@ class PlotLine(
                     distance != 0f -> value / distance
                     else -> null
                 }
+            }
+            PlotHighlightMethod.AVG_BY_VALUE -> {
+                  PlotLineItem.byDimensionY(dataPoints, secondaryDimension)
             }
             else -> null
         }
@@ -345,7 +342,8 @@ class PlotLine(
             PlotHighlightMethod.AVG_BY_INDEX,
             PlotHighlightMethod.AVG_BY_DISTANCE,
             PlotHighlightMethod.AVG_BY_TIME,
-            PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE -> averageValue(dataPoints, inlineHighlightMethod, secondaryDimension)
+            PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE,
+            PlotHighlightMethod.AVG_BY_VALUE -> averageValue(dataPoints, inlineHighlightMethod, secondaryDimension)
             else -> null
         }
     }
