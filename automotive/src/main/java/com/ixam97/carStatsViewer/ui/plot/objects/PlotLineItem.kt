@@ -85,16 +85,22 @@ class PlotLineItem (
             return 1f / (max - min) * (index - min)
         }
 
-        fun  byDimensionY(dataPoints: List<PlotLineItem>, dimensionY: PlotDimensionY? = null): Float? {
+        fun byDimensionY(dataPoints: List<PlotLineItem>, dimensionY: PlotDimensionY? = null): Float? {
             return when (dimensionY) {
                 PlotDimensionY.SPEED -> {
-                    val points = dataPoints.filter { (it.DistanceDelta ?: 0f) != 0f && it.Marker != PlotLineMarkerType.BEGIN_SESSION }
-                    val distance = points.map { (it.DistanceDelta ?: 0f) }.sum()
-                    val time = points.sumOf { (it.TimeDelta ?: 0L) }
+                    val points = dataPoints.filter { (it.DistanceDelta ?: 0f) != 0f && (it.TimeDelta ?: 0L) != 0L && it.Marker != PlotLineMarkerType.BEGIN_SESSION }
 
                     when {
-                        distance == 0f || time <= 0L -> null
-                        else -> distance / (time / 1_000_000_000f) * 3.6f
+                        points.isEmpty() -> null
+                        else -> {
+                            val distance = points.map { (it.DistanceDelta ?: 0f) }.sum()
+                            val time = points.sumOf { (it.TimeDelta ?: 0L) }
+
+                            when {
+                                distance == 0f || time <= 0L -> null
+                                else -> distance / (time / 1_000_000_000f) * 3.6f
+                            }
+                        }
                     }
                 }
                 PlotDimensionY.CONSUMPTION -> {
