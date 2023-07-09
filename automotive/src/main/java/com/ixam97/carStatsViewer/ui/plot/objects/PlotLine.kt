@@ -266,18 +266,14 @@ class PlotLine(
 
     private fun averageValue(dataPoints: List<PlotLineItem>, averageMethod: PlotHighlightMethod, secondaryDimension: PlotDimensionY? = null): Float? {
         if (dataPoints.isEmpty()) return null
-
-        val filtered = dataPoints.filter { (it.byDimensionY(secondaryDimension) ?: 0f) != 0f }
-
-        if (filtered.isEmpty()) return null
-        if (filtered.size == 1) return filtered.first().byDimensionY(secondaryDimension)
+        if (dataPoints.isEmpty() || dataPoints.all { (it.byDimensionY(secondaryDimension)?:0f) == 0f }) return null
+        if (dataPoints.size == 1) return dataPoints.first().byDimensionY(secondaryDimension)
 
         val averageValue = when (averageMethod) {
-            PlotHighlightMethod.AVG_BY_INDEX -> filtered.mapNotNull { it.byDimensionY(secondaryDimension) }.average().toFloat()
+            PlotHighlightMethod.AVG_BY_INDEX -> dataPoints.mapNotNull { it.byDimensionY(secondaryDimension) }.average().toFloat()
             PlotHighlightMethod.AVG_BY_DISTANCE -> {
-                val filteredAverageMethod = filtered.filter { (it.DistanceDelta ?: 0f) != 0f }
-                val value = filteredAverageMethod.map { (it.DistanceDelta ?: 0f) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
-                val distance = filteredAverageMethod.map { (it.DistanceDelta ?: 0f) }.sum()
+                val value = dataPoints.map { (it.DistanceDelta ?: 0f) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
+                val distance = dataPoints.map { (it.DistanceDelta ?: 0f) }.sum()
 
                 when {
                     distance != 0f -> value / distance
@@ -285,9 +281,8 @@ class PlotLine(
                 }
             }
             PlotHighlightMethod.AVG_BY_TIME -> {
-                val filteredAverageMethod = filtered.filter { (it.TimeDelta ?: 0L) != 0L  }
-                val value = filteredAverageMethod.map { (it.TimeDelta ?: 0L) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
-                val distance = filteredAverageMethod.sumOf { (it.TimeDelta ?: 0L) }
+                val value = dataPoints.map { (it.TimeDelta ?: 0L) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
+                val distance = dataPoints.sumOf { (it.TimeDelta ?: 0L) }
 
                 when {
                     distance != 0L -> value / distance
@@ -295,9 +290,8 @@ class PlotLine(
                 }
             }
             PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE -> {
-                val filteredAverageMethod = filtered.filter { (it.StateOfChargeDelta ?: 0f) != 0f }
-                val value = filteredAverageMethod.map { (it.StateOfChargeDelta ?: 0f) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
-                val distance = filteredAverageMethod.map { (it.StateOfChargeDelta ?: 0f) }.sum()
+                val value = dataPoints.map { (it.StateOfChargeDelta ?: 0f) * (it.byDimensionY(secondaryDimension) ?: 0f) }.sum()
+                val distance = dataPoints.map { (it.StateOfChargeDelta ?: 0f) }.sum()
 
                 when {
                     distance != 0f -> value / distance
@@ -309,7 +303,7 @@ class PlotLine(
 
         if (averageValue != null) return averageValue
 
-        val nonNull = filtered.mapNotNull { it.byDimensionY(secondaryDimension) }
+        val nonNull = dataPoints.mapNotNull { it.byDimensionY(secondaryDimension) }
 
         return when {
             nonNull.isEmpty() -> null
