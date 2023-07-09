@@ -88,7 +88,7 @@ class PlotLineItem (
         fun byDimensionY(dataPoints: List<PlotLineItem>, dimensionY: PlotDimensionY? = null): Float? {
             return when (dimensionY) {
                 PlotDimensionY.SPEED -> {
-                    val points = dataPoints.filter { (it.DistanceDelta ?: 0f) != 0f && (it.TimeDelta ?: 0L) != 0L && it.Marker != PlotLineMarkerType.BEGIN_SESSION }
+                    val points = dataPoints.filter { (it.DistanceDelta ?: 0f) != 0f && (it.TimeDelta ?: 0L) != 0L }
 
                     when {
                         points.isEmpty() -> null
