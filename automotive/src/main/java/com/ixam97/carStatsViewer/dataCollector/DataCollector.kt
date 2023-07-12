@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.*
 class DataCollector: Service() {
 
     companion object {
-        const val LIVE_DATA_TASK_INTERVAL = 5_000
+        const val LIVE_DATA_TASK_INTERVAL = 2_000
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -123,9 +123,7 @@ class DataCollector: Service() {
         CarStatsViewer.liveDataApis[0]
             .requestFlow(
                 serviceScope,
-                realTimeData = { CarStatsViewer.dataProcessor.realTimeData },
-                drivingSession = { CarStatsViewer.dataProcessor.selectedSessionDataFlow?.value },
-                deltaData = { CarStatsViewer.dataProcessor.deltaData},
+                dataProcessor = CarStatsViewer.dataProcessor,
                 LIVE_DATA_TASK_INTERVAL
             ).catch { e -> InAppLogger.e("[NEO] requestFlow: ${e.message}") }
             .launchIn(serviceScope)
@@ -133,9 +131,7 @@ class DataCollector: Service() {
         CarStatsViewer.liveDataApis[1]
             .requestFlow(
                 serviceScope,
-                realTimeData = { CarStatsViewer.dataProcessor.realTimeData },
-                drivingSession = { CarStatsViewer.dataProcessor.selectedSessionDataFlow?.value },
-                deltaData = { CarStatsViewer.dataProcessor.deltaData},
+                dataProcessor = CarStatsViewer.dataProcessor,
                 LIVE_DATA_TASK_INTERVAL
             ).catch { e -> InAppLogger.e("[NEO] requestFlow: ${e.message}") }
             .launchIn(serviceScope)

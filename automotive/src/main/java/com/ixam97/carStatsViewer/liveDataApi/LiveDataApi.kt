@@ -3,6 +3,7 @@ package com.ixam97.carStatsViewer.liveDataApi
 import android.content.Context
 import android.os.Handler
 import com.ixam97.carStatsViewer.CarStatsViewer
+import com.ixam97.carStatsViewer.dataProcessor.DataProcessor
 import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
@@ -75,12 +76,15 @@ abstract class LiveDataApi(
     //    }
     }
 
-    fun requestFlow(serviceScope: CoroutineScope, realTimeData: () -> RealTimeData, drivingSession: () -> DrivingSession?, deltaData: () -> DeltaData?, interval: Int): Flow<Unit> {
+    fun requestFlow(serviceScope: CoroutineScope, dataProcessor: DataProcessor, interval: Int): Flow<Unit> {
         timeout = interval
         originalInterval = interval
         return flow {
+            var startEpoch = 0L
             while (true) {
-                coroutineSendNow(realTimeData(), drivingSession(),deltaData())
+                val endEpoch = dataProcessor.realTimeData.timestamp ?: 0L
+                coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, dataProcessor.getDrivePointDeltaBetween(startEpoch, endEpoch))
+                startEpoch = endEpoch
                 delay(timeout.toLong())
             }
         }

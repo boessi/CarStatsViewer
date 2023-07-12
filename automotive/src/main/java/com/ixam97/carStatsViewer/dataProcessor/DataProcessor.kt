@@ -78,12 +78,6 @@ class DataProcessor {
             _realTimeDataFlow.value = value
         }
 
-    var deltaData = DeltaData()
-        private set(value) {
-            field = value
-            _deltaDataFlow.value = value
-        }
-
     // private var chargingTripData = ChargingTripData()
     //     set(value) {
     //         field = value
@@ -92,9 +86,7 @@ class DataProcessor {
 
 
     private val _realTimeDataFlow = MutableStateFlow(realTimeData)
-    private val _deltaDataFlow = MutableStateFlow(deltaData)
     val realTimeDataFlow = _realTimeDataFlow.asStateFlow()
-    val deltaDataFlow = _deltaDataFlow.asStateFlow();
 
     private val _selectedSessionDataFlow = MutableStateFlow<DrivingSession?>(null)
     val selectedSessionDataFlow = _selectedSessionDataFlow.asStateFlow()
@@ -173,7 +165,8 @@ class DataProcessor {
             ambientTemperature = if (carPropertiesData.CurrentAmbientTemperature.value == null) null else (carPropertiesData.CurrentAmbientTemperature.value as Float?)?: 0f,
             selectedGear = if (carPropertiesData.CurrentGear.value == null) null else (carPropertiesData.CurrentGear.value as Int?)?: 0,
             ignitionState = if (carPropertiesData.CurrentIgnitionState.value == null) null else (carPropertiesData.CurrentIgnitionState.value as Int?)?: 0,
-            chargePortConnected = if (carPropertiesData.ChargePortConnected.value == null) null else (carPropertiesData.ChargePortConnected.value as Boolean?)?: false
+            chargePortConnected = if (carPropertiesData.ChargePortConnected.value == null) null else (carPropertiesData.ChargePortConnected.value as Boolean?)?: false,
+            timestamp = carPropertiesData.maxTimestamp()
         )
 
         if (!realTimeData.isInitialized() || !staticVehicleData.isInitialized()) {
@@ -251,7 +244,6 @@ class DataProcessor {
             //if (timestampSynchronizer.getSystemTimeFromNanosTimestamp(carPropertiesData.CurrentPower.timestamp) < System.currentTimeMillis() - 500) {
         if (carPropertiesData.CurrentPower.timestamp < System.nanoTime() - 500_000_000) {
             InAppLogger.w("[NEO] Dropped power value, timestamp too old. Time delta: ${(System.nanoTime() - carPropertiesData.CurrentPower.timestamp)/1_000_000}")
-            deltaData = deltaData.copy( powerUsed = null, timeSpanPower = null );
             return
         }
         // }
@@ -260,7 +252,6 @@ class DataProcessor {
             val energyDelta = emulatorPowerSign * (carPropertiesData.CurrentPower.value as Float) / 1_000f * (carPropertiesData.CurrentPower.timeDelta / 3.6E12)
             pointUsedEnergy += energyDelta
             valueUsedEnergy += energyDelta
-            deltaData = deltaData.copy( powerUsed = energyDelta, timeSpanPower = carPropertiesData.CurrentPower.timeDelta );
 
             // if (realTimeData.drivingState == DrivingState.CHARGE) {
             //     if (pointUsedEnergy.absoluteValue > Defines.PLOT_ENERGY_INTERVAL)
@@ -436,6 +427,21 @@ class DataProcessor {
             timerMap.forEach {
                 it.value.stop()
             }
+        }
+    }
+
+    suspend fun getDrivePointDeltaBetween(startEpoch: Long, endEpoch: Long): DeltaData {
+        val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(startEpoch, endEpoch);
+
+        return when {
+            drivingPointList.isEmpty() -> DeltaData(0f, 0f, 0)
+            else -> DeltaData(
+                drivingPointList.map { it.energy_delta }.sum(),
+                drivingPointList.map { it.distance_delta }.sum(),
+                drivingPointList.maxOf { it.driving_point_epoch_time }.minus(
+                    drivingPointList.minOf { it.driving_point_epoch_time }
+                )
+            )
         }
     }
 
