@@ -13,8 +13,7 @@ data class RealTimeData(
     val ambientTemperature: Float? = null,
     val lat: Float? = null,
     val lon: Float? = null,
-    val alt: Float? = null,
-    val timestamp: Long? = null
+    val alt: Float? = null
 ) {
     val drivingState: Int get() = getDriveState()
     val instConsumption: Float? get() = getInstCons()

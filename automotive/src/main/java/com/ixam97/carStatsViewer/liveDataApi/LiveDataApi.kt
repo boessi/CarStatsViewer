@@ -80,11 +80,10 @@ abstract class LiveDataApi(
         timeout = interval
         originalInterval = interval
         return flow {
-            var startEpoch = 0L
+            var delta : DeltaData? = null
             while (true) {
-                val endEpoch = dataProcessor.realTimeData.timestamp ?: 0L
-                coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, dataProcessor.getDrivePointDeltaBetween(startEpoch, endEpoch))
-                startEpoch = endEpoch
+                delta = dataProcessor.getDrivePointDeltaBetween(delta?.refEpoch)
+                coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, delta)
                 delay(timeout.toLong())
             }
         }

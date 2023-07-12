@@ -165,8 +165,7 @@ class DataProcessor {
             ambientTemperature = if (carPropertiesData.CurrentAmbientTemperature.value == null) null else (carPropertiesData.CurrentAmbientTemperature.value as Float?)?: 0f,
             selectedGear = if (carPropertiesData.CurrentGear.value == null) null else (carPropertiesData.CurrentGear.value as Int?)?: 0,
             ignitionState = if (carPropertiesData.CurrentIgnitionState.value == null) null else (carPropertiesData.CurrentIgnitionState.value as Int?)?: 0,
-            chargePortConnected = if (carPropertiesData.ChargePortConnected.value == null) null else (carPropertiesData.ChargePortConnected.value as Boolean?)?: false,
-            timestamp = carPropertiesData.maxTimestamp()
+             chargePortConnected = if (carPropertiesData.ChargePortConnected.value == null) null else (carPropertiesData.ChargePortConnected.value as Boolean?)?: false
         )
 
         if (!realTimeData.isInitialized() || !staticVehicleData.isInitialized()) {
@@ -430,18 +429,19 @@ class DataProcessor {
         }
     }
 
-    suspend fun getDrivePointDeltaBetween(startEpoch: Long, endEpoch: Long): DeltaData {
-        val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(startEpoch, endEpoch);
+    suspend fun getDrivePointDeltaBetween(startEpoch: Long? = null, endEpoch: Long? = null): DeltaData {
+        val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(startEpoch ?: Long.MIN_VALUE, endEpoch ?: Long.MAX_VALUE);
 
-        return when {
-            drivingPointList.isEmpty() -> DeltaData(0f, 0f, 0)
-            else -> DeltaData(
-                drivingPointList.map { it.energy_delta }.sum(),
-                drivingPointList.map { it.distance_delta }.sum(),
-                drivingPointList.maxOf { it.driving_point_epoch_time }.minus(
-                    drivingPointList.minOf { it.driving_point_epoch_time }
-                )
-            )
+         return when {
+             drivingPointList.isEmpty() -> DeltaData()
+             startEpoch == null -> DeltaData(refEpoch = drivingPointList.maxOf { it.driving_point_epoch_time } + 1)
+             else -> DeltaData(
+                 drivingPointList.map { it.energy_delta }.sum(),
+                 drivingPointList.map { it.distance_delta }.sum(),
+                 startEpoch,
+                 drivingPointList.maxOf { it.driving_point_epoch_time },
+                 drivingPointList.maxOf { it.driving_point_epoch_time } + 1
+             )
         }
     }
 
