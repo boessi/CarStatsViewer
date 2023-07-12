@@ -81,10 +81,6 @@ class CarPropertiesData {
         return VALID
     }
 
-    fun maxTimestamp(): Long? {
-        return propertiesMap.mapNotNull { it.value.timestamp }.maxOfOrNull { it }
-    }
-
     private val propertiesMap: Map<Int, CarProperty> = mapOf(
         CurrentSpeed.propertyId to CurrentSpeed,
         CurrentPower.propertyId to CurrentPower,
