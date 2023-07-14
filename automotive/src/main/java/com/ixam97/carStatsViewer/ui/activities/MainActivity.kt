@@ -277,30 +277,33 @@ class MainActivity : FragmentActivity() {
 
                     /** Add new plot points */
                     session?.drivingPoints?.let { drivingPoints ->
-                        var sizeDelta = drivingPoints.size - consumptionPlotLine.getDataPointsSize()
-                        // InAppLogger.d("Size delta: $sizeDelta (${drivingPoints.size} vs. ${consumptionPlotLine.getDataPointsSize()}, $nonFiniteCounter non-finite)")
-                        if (sizeDelta in 1..9) {
-                            while (sizeDelta > 0) {
-                                val prevDrivingPoint = if (consumptionPlotLine.getDataPointsSize() > 0) {
-                                    consumptionPlotLine.getDataPoints(PlotDimensionX.DISTANCE).last()
-                                } else null
-                                consumptionPlotLine.addDataPoint(
-                                    DataConverters.consumptionPlotLineItemFromDrivingPoint(
-                                        drivingPoints[drivingPoints.size - sizeDelta],
-                                        prevDrivingPoint
-                                    )
-                                )
-                                sizeDelta --
+                        val startIndex = consumptionPlotLine.getDataPointsSize()
+                        when {
+                            startIndex == 0 && drivingPoints.isEmpty() -> {
+                                consumptionPlotLine.reset()
                             }
-                            main_consumption_plot.invalidate()
-                        } else if (sizeDelta > 10) {
-                            /** refresh entire plot for large numbers of new data Points */
-                            consumptionPlotLine.reset()
-                            consumptionPlotLine.addDataPoints(DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints))
-                            main_consumption_plot.invalidate()
+                            startIndex == 0 -> {
+                                consumptionPlotLine.reset()
+                                consumptionPlotLine.addDataPoints(DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints))
+                            }
+                            startIndex != drivingPoints.size -> {
+                                var prevDrivingPoint = consumptionPlotLine.lastItem()
+
+                                for (i in drivingPoints.indices) {
+                                    if (i < startIndex) continue
+
+                                    prevDrivingPoint = consumptionPlotLine.addDataPoint(
+                                        DataConverters.consumptionPlotLineItemFromDrivingPoint(
+                                            drivingPoints[i],
+                                            prevDrivingPoint
+                                        )
+                                    ) ?: prevDrivingPoint
+                                }
+                            }
                         }
+
+                        main_consumption_plot.invalidate()
                     }
-                    // updateActivity()
                 }
             }
         }

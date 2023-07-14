@@ -423,39 +423,11 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        alignZero()
         drawBackground(canvas)
         drawXLines(canvas)
         drawYBaseLines(canvas)
         drawPlot(canvas)
         drawYLines(canvas)
-    }
-
-    private fun alignZero() {
-        if (plotLines.none { it.first.alignZero }) return
-
-        var zeroAt : Float? = null
-        for (index in plotLines.indices) {
-            val pair = plotLines[index]
-            val line = pair?.first ?: continue
-
-            if (index == 0) {
-                if (line.isEmpty() || !line.Visible) return
-
-                val dataPoints = line.getDataPoints(dimension, dimensionRestriction, dimensionShift)
-                if (dataPoints.isEmpty()) return
-
-                val minValue = line.minValue(dataPoints)!!
-                val maxValue = line.maxValue(dataPoints)!!
-
-                zeroAt = PlotLineItem.cord(0f, minValue, maxValue)
-                continue
-            }
-
-            if (line.alignZero) {
-                line.zeroAt = zeroAt
-            }
-        }
     }
 
     private fun drawBackground(canvas: Canvas) {
@@ -752,16 +724,13 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 prevPoint === null -> {
                     firstPoint = point
                     path.moveTo(point.x, point.y)
+                    path.lineTo(point.x, point.y)
                 }
                 else -> {
                     val midX = (prevPoint.x + point.x) / 2
                     val midY = (prevPoint.y + point.y) / 2
 
-                    if (i == 1) {
-                        path.lineTo(midX, midY)
-                    } else {
-                        path.quadTo(prevPoint.x, prevPoint.y, midX, midY)
-                    }
+                    path.quadTo(prevPoint.x, prevPoint.y, midX, midY)
                 }
             }
 

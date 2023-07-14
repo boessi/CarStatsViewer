@@ -526,7 +526,7 @@ class DataProcessor {
      * Update driving trip data flow for UI.
      */
     private fun newDrivingDeltas(distanceDelta: Double, energyDelta: Double) {
-        localSessions.forEachIndexed {index, localSession ->
+        localSessions.forEachIndexed { index, localSession ->
             val drivingPoints = localSession.drivingPoints
             localSessions[index] = localSession.copy(
                 drive_time = timerMap[localSession.session_type]?.getTime()?:0L,
@@ -535,10 +535,9 @@ class DataProcessor {
                 last_edited_epoch_time = System.currentTimeMillis()
             )
             localSessions[index].drivingPoints = drivingPoints
-            if (localSession.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
-                _selectedSessionDataFlow.value = localSessions[index]
-            }
         }
+
+        _selectedSessionDataFlow.value = localSessions.last { it.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1 }
     }
 
     private suspend fun writeTripsToDatabase() {
