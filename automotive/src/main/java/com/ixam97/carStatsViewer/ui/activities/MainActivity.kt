@@ -46,7 +46,7 @@ class MainActivity : FragmentActivity() {
 
     private val consumptionPlotLine = PlotLine(
         PlotLineConfiguration(
-            PlotRange(-300f, 900f, -300f, 900f, 100f, 0f),
+            PlotRange(-200f, 600f, -200f, 600f, 100f, 0f),
             PlotLineLabelFormat.NUMBER,
             PlotHighlightMethod.AVG_BY_DISTANCE,
             "Wh/km"
@@ -304,6 +304,8 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
+
+        appPreferences.altLayout = false
 
         startForegroundService(Intent(applicationContext, DataCollector::class.java))
 
