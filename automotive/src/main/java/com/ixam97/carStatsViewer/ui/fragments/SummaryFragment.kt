@@ -190,8 +190,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
     private fun setupPlots() {
         summary_consumption_plot.dimensionYPrimary = PlotDimensionY.CONSUMPTION
         summary_consumption_plot.dimension = PlotDimensionX.DISTANCE
-        summary_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(
-            MainActivity.DISTANCE_TRIP_DIVIDER)
+        summary_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(MainActivity.DISTANCE_TRIP_DIVIDER)
         summary_consumption_plot.dimensionSmoothing = 0.02f
         summary_consumption_plot.dimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE
         summary_consumption_plot.visibleMarkerTypes.add(PlotMarkerType.CHARGE)

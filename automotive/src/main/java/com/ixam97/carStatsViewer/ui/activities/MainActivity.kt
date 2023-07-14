@@ -29,6 +29,7 @@ import com.ixam97.carStatsViewer.ui.views.GageView
 import com.ixam97.carStatsViewer.ui.views.PlotView
 import com.ixam97.carStatsViewer.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_summary.summary_consumption_plot
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import java.util.concurrent.TimeUnit
@@ -36,7 +37,7 @@ import kotlin.math.roundToInt
 
 class MainActivity : FragmentActivity() {
     companion object {
-        const val DISTANCE_TRIP_DIVIDER = 5_000L
+        const val DISTANCE_TRIP_DIVIDER = 1_000L
         const val CONSUMPTION_DISTANCE_RESTRICTION = 10_000L
     }
 
@@ -505,6 +506,8 @@ class MainActivity : FragmentActivity() {
         main_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER)
         main_consumption_plot.dimensionSmoothing = 0.02f
         main_consumption_plot.dimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE
+        main_consumption_plot.visibleMarkerTypes.add(PlotMarkerType.CHARGE)
+        main_consumption_plot.visibleMarkerTypes.add(PlotMarkerType.PARK)
         main_consumption_plot.sessionGapRendering = PlotSessionGapRendering.JOIN
         main_consumption_plot.dimensionYSecondary = PlotDimensionY.IndexMap[appPreferences.secondaryConsumptionDimension] ?: PlotDimensionY.CONSUMPTION
 

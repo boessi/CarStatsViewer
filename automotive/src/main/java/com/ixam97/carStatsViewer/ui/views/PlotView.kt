@@ -621,11 +621,11 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         }
     }
 
-    private fun toPlotPointCollection(configuration: PlotLineConfiguration, line: PlotLine, dimensionY: PlotDimensionY?, minValue: Float, maxValue: Float, minDimension: Any, maxDimension: Any, maxX: Float, maxY: Float, smoothing: Float?, smoothingPercentage: Float?): ArrayList<ArrayList<PointF>> {
+    private fun toPlotPointCollection(configuration: PlotLineConfiguration, line: PlotLine, dimensionY: PlotDimensionY?, minValue: Float, maxValue: Float, minDimension: Any, maxDimension: Any, maxX: Float, maxY: Float, smoothing: Float?, smoothingPercentage: Float?): ArrayList<ArrayList<PlotPointMinAvgMax>> {
         val dataPointsUnrestricted = line.getDataPoints(dimension)
         val plotLineItemPointCollection = line.toPlotLineItemPointCollection(dataPointsUnrestricted, dimension, smoothing, minDimension, maxDimension)
 
-        val plotPointCollection = ArrayList<ArrayList<PointF>>()
+        val plotPointCollection = ArrayList<ArrayList<PlotPointMinAvgMax>>()
         for (collection in plotLineItemPointCollection) {
             if (collection.isEmpty()) continue
 
@@ -640,7 +640,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 }
              }
 
-            val plotPoints = ArrayList<PointF>()
+            val plotPoints = ArrayList<PlotPointMinAvgMax>()
 
             for (group in collection.groupBy { it.group }) {
                 val plotPoint = when {
@@ -651,7 +651,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                         val x = x(point.x, 0f, 1f, maxX) ?: continue
                         val y = y(value, minValue, maxValue, maxY) ?: continue
 
-                        PointF(x, y)
+                        PlotPointMinAvgMax(PointF(x, y), PointF(x, y), PointF(x, y))
                     }
                     else -> {
                         val xGroup = when (plotPoints.size) {
@@ -659,11 +659,14 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                             else -> group.value.maxOfOrNull { it.x }
                         } ?: continue
 
-                        val value = line.averageValue(group.value.map { it.y }, dimension, dimensionY)
-                        val x = x(xGroup, 0f, 1f, maxX) ?: continue
-                        val y = y(value, minValue, maxValue, maxY) ?: continue
 
-                        PointF(x, y)
+                        val x = x(xGroup, 0f, 1f, maxX) ?: continue
+
+                        PlotPointMinAvgMax(
+                            PointF(x, y(line.minValue(group.value.map { it.y }, dimensionY, false), minValue, maxValue, maxY) ?: continue),
+                            PointF(x, y(line.averageValue(group.value.map { it.y }, dimension, dimensionY), minValue, maxValue, maxY) ?: continue),
+                            PointF(x, y(line.maxValue(group.value.map { it.y }, dimensionY, false), minValue, maxValue, maxY) ?: continue)
+                        )
                     }
                 }
 
@@ -676,11 +679,11 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         return plotPointCollection
     }
 
-    private fun drawPlotPointCollection(canvas: Canvas, configuration: PlotLineConfiguration, plotPointCollection: ArrayList<ArrayList<PointF>>, maxX: Float, maxY: Float, paint: PlotPaint, drawBackground: Boolean, zeroCord: Float?) {
+    private fun drawPlotPointCollection(canvas: Canvas, configuration: PlotLineConfiguration, plotPointCollection: ArrayList<ArrayList<PlotPointMinAvgMax>>, maxX: Float, maxY: Float, paint: PlotPaint, drawBackground: Boolean, zeroCord: Float?) {
 
         restrictCanvas(canvas, maxX, maxY)
 
-        val joinedPlotPoints = ArrayList<PointF>()
+        val joinedPlotPoints = ArrayList<PlotPointMinAvgMax>()
 
         for (plotPointIndex in plotPointCollection.indices) {
             val plotPoints = plotPointCollection[plotPointIndex]
@@ -696,11 +699,11 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         }
 
         if ((configuration.SessionGapRendering ?: sessionGapRendering) == PlotSessionGapRendering.GAP) {
-            var last: PointF? = null
+            var last: PlotPointMinAvgMax? = null
             for (collection in plotPointCollection) {
                 if (last != null) {
                     val first = collection.first()
-                    drawLine(canvas, last.x, last.y, first.x, first.y, paint.PlotGapSecondary)
+                    drawLine(canvas, last.avg.x, last.avg.y, first.avg.x, first.avg.y, paint.PlotGapSecondary)
                 }
                 last = collection.last()
             }
@@ -709,7 +712,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         canvas.restore()
     }
 
-    private fun drawPlotPoints(canvas: Canvas, configuration: PlotLineConfiguration, plotPoints : ArrayList<PointF>, plotPaint: PlotPaint, drawBackground: Boolean, zeroCord: Float?, lastPlot: Boolean = true) {
+    private fun drawPlotPoints(canvas: Canvas, configuration: PlotLineConfiguration, plotPoints : ArrayList<PlotPointMinAvgMax>, plotPaint: PlotPaint, drawBackground: Boolean, zeroCord: Float?, lastPlot: Boolean = true) {
         val linePaint = when (lastPlot) {
             true -> when (drawBackground) {
                 true -> plotPaint.PlotBackground
@@ -720,10 +723,13 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 else -> plotPaint.PlotSecondary
             }
         }
-        drawPlotLine(canvas, configuration, linePaint, plotPaint.TransparentColor, plotPoints, drawBackground, zeroCord)
+
+        drawPlotLine(canvas, configuration, plotPaint.MinMax, plotPaint.TransparentColor, plotPoints.map { it.min }, false, zeroCord)
+        drawPlotLine(canvas, configuration, plotPaint.MinMax, plotPaint.TransparentColor, plotPoints.map { it.max }, false, zeroCord)
+        drawPlotLine(canvas, configuration, linePaint, plotPaint.TransparentColor, plotPoints.map { it.avg }, drawBackground, zeroCord)
     }
 
-    private fun drawPlotLine(canvas : Canvas, configuration: PlotLineConfiguration, paint : Paint, transparentColor: Int, plotPoints : ArrayList<PointF>, drawBackground: Boolean, zeroCord: Float?) {
+    private fun drawPlotLine(canvas : Canvas, configuration: PlotLineConfiguration, paint : Paint, transparentColor: Int, plotPoints : List<PointF>, drawBackground: Boolean, zeroCord: Float?) {
         if (plotPoints.isEmpty()) return
         if (drawBackground && zeroCord == null) return
 
