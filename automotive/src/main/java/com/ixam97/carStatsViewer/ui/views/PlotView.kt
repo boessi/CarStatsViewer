@@ -724,6 +724,14 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             }
         }
 
+        val minMax = arrayListOf<PointF>()
+
+        minMax.addAll(plotPoints.map { it.min })
+        minMax.addAll(plotPoints.map { it.max }.reversed())
+
+        drawPlotLine(canvas, configuration, plotPaint.MinMax, plotPaint.TransparentColor, minMax, false, zeroCord)
+
+ =======
         drawPlotLine(canvas, configuration, plotPaint.MinMax, plotPaint.TransparentColor, plotPoints.map { it.min }, false, zeroCord)
         drawPlotLine(canvas, configuration, plotPaint.MinMax, plotPaint.TransparentColor, plotPoints.map { it.max }, false, zeroCord)
         drawPlotLine(canvas, configuration, linePaint, plotPaint.TransparentColor, plotPoints.map { it.avg }, drawBackground, zeroCord)
