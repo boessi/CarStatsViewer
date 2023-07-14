@@ -50,7 +50,7 @@ object PlotGlobalConfiguration {
                 MinMaxRendering = true
             ),
             PlotDimensionY.CONSUMPTION to PlotLineConfiguration(
-                PlotRange(-300f, 900f, -300f, 900f, 100f, 0f),
+                PlotRange(-200f, 600f, -200f, 600f, 100f, 0f),
                 PlotLineLabelFormat.NUMBER,
                 PlotHighlightMethod.AVG_BY_VALUE,
                 "Wh/km"
