@@ -60,7 +60,7 @@ class MainActivity : FragmentActivity() {
 
     private val chargePlotLine = PlotLine(
         PlotLineConfiguration(
-            PlotRange(0f, 20f, 0f, 160f, 20f),
+            PlotRange(0f, 5f, 0f, 160f, 5f),
             PlotLineLabelFormat.FLOAT,
             PlotHighlightMethod.AVG_BY_TIME,
             "kW"
@@ -217,6 +217,7 @@ class MainActivity : FragmentActivity() {
                         chargePlotLine.reset()
                         chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(chargingPoints))
                         main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
+                        main_charge_plot.dimensionRestrictionMin = TimeUnit.MINUTES.toMillis(1)
                         main_charge_plot.invalidate()
 
                         if (sizeDelta in 1..9 && chargingPoints.last().point_marker_type == null) {
@@ -511,8 +512,6 @@ class MainActivity : FragmentActivity() {
         main_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER)
         main_consumption_plot.dimensionSmoothing = 0.02f
         main_consumption_plot.dimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE
-        main_consumption_plot.visibleMarkerTypes.add(PlotMarkerType.CHARGE)
-        main_consumption_plot.visibleMarkerTypes.add(PlotMarkerType.PARK)
         main_consumption_plot.sessionGapRendering = PlotSessionGapRendering.JOIN
         main_consumption_plot.dimensionYSecondary = PlotDimensionY.IndexMap[appPreferences.secondaryConsumptionDimension] ?: PlotDimensionY.CONSUMPTION
 

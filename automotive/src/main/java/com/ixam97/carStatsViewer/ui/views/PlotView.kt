@@ -585,7 +585,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
                     drawPlotPointCollection(canvas, configuration, plotPointCollection, maxX, maxY, paint, drawBackground, zeroCord)
 
-                    if (!drawBackground && dimensionY == null && plotMarkers?.markers?.isNotEmpty() == true) {
+                    if (!drawBackground && dimensionY == dimensionYPrimary && plotMarkers?.markers?.isNotEmpty() == true) {
                         drawMarker(canvas, minDimension, maxDimension, maxX, maxY)
                     }
                 }
@@ -1063,14 +1063,11 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     private fun timeLabel(time: Long): String {
-        // return when {
-        //     TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS) > 12 -> String.format("%02d:%02d", TimeUnit.DAYS.convert(time, TimeUnit.NANOSECONDS), TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS) % 24)
-        //     TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS) > 30 -> String.format("%02d:%02d'", TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS), TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS) % 60)
-        //     else -> String.format("%02d'%02d''", TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS), TimeUnit.SECONDS.convert(time, TimeUnit.NANOSECONDS) % 60)
-        // }
-        return String.format("%02d:%02d",
-            TimeUnit.MILLISECONDS.toHours(time),
-            (TimeUnit.MILLISECONDS.toSeconds(time) / 60f).roundToInt() % TimeUnit.HOURS.toMinutes(1))
+        return when {
+             TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS) > 12 -> String.format("%02d:%02d", TimeUnit.DAYS.convert(time, TimeUnit.MILLISECONDS), TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS) % 24)
+             TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS) > 30 -> String.format("%02d:%02d'", TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS), TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS) % 60)
+             else -> String.format("%02d'%02d''", TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS), TimeUnit.SECONDS.convert(time, TimeUnit.MILLISECONDS) % 60)
+        }
     }
 
     private fun label(value: Float, plotLineLabelFormat: PlotLineLabelFormat, plotHighlightMethod: PlotHighlightMethod? = null): String {
