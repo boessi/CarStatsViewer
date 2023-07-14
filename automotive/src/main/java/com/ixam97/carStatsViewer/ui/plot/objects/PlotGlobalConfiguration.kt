@@ -16,7 +16,8 @@ object PlotGlobalConfiguration {
                 DimensionSmoothing = 0.005f,
                 DimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE,
                 SessionGapRendering = PlotSessionGapRendering.JOIN,
-                DimensionSmoothingHighlightMethod = PlotHighlightMethod.AVG_BY_TIME
+                DimensionSmoothingHighlightMethod = PlotHighlightMethod.AVG_BY_TIME,
+                MinMaxRendering = true
             ),
             PlotDimensionY.DISTANCE to PlotLineConfiguration(
                 PlotRange(),
@@ -45,7 +46,8 @@ object PlotGlobalConfiguration {
                 PlotLineLabelFormat.ALTITUDE,
                 PlotHighlightMethod.AVG_BY_TIME,
                 "m",
-                SessionGapRendering = PlotSessionGapRendering.GAP
+                SessionGapRendering = PlotSessionGapRendering.GAP,
+                MinMaxRendering = true
             ),
             PlotDimensionY.CONSUMPTION to PlotLineConfiguration(
                 PlotRange(-300f, 900f, -300f, 900f, 100f, 0f),

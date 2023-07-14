@@ -24,7 +24,7 @@ class PlotPaint(
     companion object {
         private val paintCache : HashMap<Int, HashMap<Float, PlotPaint>> = HashMap()
 
-        fun byColor(color : Int, textSize: Float): PlotPaint {
+        fun byColor(color : Int, textSize: Float, minMaxAlpha: Int  = 64): PlotPaint {
 
             val cached = paintCache[color]?.get(textSize)
             if (cached != null) return cached
@@ -44,7 +44,7 @@ class PlotPaint(
             plotBackgroundPaint.style = Paint.Style.FILL
 
             val minMaxPaint = Paint(plotBackgroundPaint)
-            minMaxPaint.color = Color.argb(96, Color.red(color), Color.green(color), Color.blue(color))
+            minMaxPaint.color = Color.argb(minMaxAlpha, Color.red(color), Color.green(color), Color.blue(color))
             minMaxPaint.strokeWidth = 3f
             minMaxPaint.style = Paint.Style.FILL_AND_STROKE
 
