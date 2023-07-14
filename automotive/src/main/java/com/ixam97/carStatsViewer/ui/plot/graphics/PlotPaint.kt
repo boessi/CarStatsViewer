@@ -17,7 +17,9 @@ class PlotPaint(
     val TransparentColor: Int,
 
     val HighlightLabel: Paint,
-    val HighlightLabelLine: Paint
+    val HighlightLabelLine: Paint,
+
+    val MinMax: Paint
 ) {
     companion object {
         private val paintCache : HashMap<Int, HashMap<Float, PlotPaint>> = HashMap()
@@ -40,6 +42,12 @@ class PlotPaint(
             val plotBackgroundPaint = Paint(plotPaint)
             plotBackgroundPaint.color = Color.argb(160, Color.red(color), Color.green(color), Color.blue(color))
             plotBackgroundPaint.style = Paint.Style.FILL
+
+            val minMaxPaint = Paint(plotBackgroundPaint)
+            minMaxPaint.color = plotGapPaint.color
+            minMaxPaint.strokeWidth = 3f
+            minMaxPaint.pathEffect = DashPathEffect(floatArrayOf(5f, 10f), 0f)
+            minMaxPaint.style = Paint.Style.STROKE
 
 //            val plotSecondaryPaint = Paint(plotPaint)
 //            plotSecondaryPaint.color = Color.argb(160, Color.red(color), Color.green(color), Color.blue(color))
@@ -70,7 +78,8 @@ class PlotPaint(
                 color, // use same as primary for now
                 Color.argb(0, Color.red(color), Color.green(color), Color.blue(color)),
                 highlightLabelPaint,
-                highlightLabelLinePaint
+                highlightLabelLinePaint,
+                minMaxPaint
             )
 
             if (paintCache[color] == null) paintCache[color] = HashMap()
