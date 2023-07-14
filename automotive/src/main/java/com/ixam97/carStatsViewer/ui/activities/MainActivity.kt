@@ -209,39 +209,35 @@ class MainActivity : FragmentActivity() {
                         neoChargedEnergy = it.charged_energy
                         neoChargeTime = it.chargeTime
                     }
-                    chargingSession?.chargingPoints?.let { chargingPoints ->
-                        var sizeDelta = chargingPoints.size - chargePlotLine.getDataPointsSize()
+                    chargingSession?.chargingPoints?.let { points ->
+                        val startIndex = chargePlotLine.getDataPointsSize()
+                        when {
+                            startIndex == 0 && points.isEmpty() -> {
+                                chargePlotLine.reset()
+                            }
+                            startIndex == 0 -> {
+                                chargePlotLine.reset()
+                                chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(points))
+                            }
+                            startIndex != points.size -> {
+                                var prevDrivingPoint = chargePlotLine.lastItem()
 
-                        // InAppLogger.d("[NEO] Updating charging plot. Size delta: $sizeDelta")
+                                for (i in points.indices) {
+                                    if (i < startIndex) continue
 
-                        chargePlotLine.reset()
-                        chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(chargingPoints))
+                                    prevDrivingPoint = chargePlotLine.addDataPoint(
+                                        DataConverters.chargePlotLineItemFromChargingPoint(
+                                            points[i],
+                                            prevDrivingPoint
+                                        )
+                                    ) ?: prevDrivingPoint
+                                }
+                            }
+                        }
+
                         main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
                         main_charge_plot.dimensionRestrictionMin = TimeUnit.MINUTES.toMillis(1)
                         main_charge_plot.invalidate()
-
-                        if (sizeDelta in 1..9 && chargingPoints.last().point_marker_type == null) {
-                            while (sizeDelta > 0) {
-                                val prevChargingPoint = if (chargePlotLine.getDataPointsSize() > 0) {
-                                    chargePlotLine.getDataPoints(PlotDimensionX.TIME).last()
-                                } else null
-                                chargePlotLine.addDataPoint(
-                                    DataConverters.chargePlotLineItemFromChargingPoint(
-                                        chargingPoints[chargingPoints.size - sizeDelta],
-                                        prevChargingPoint
-                                    )
-                                )
-                                sizeDelta --
-                            }
-                            main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
-                            main_charge_plot.invalidate()
-                        } else /*if (sizeDelta > 10 || sizeDelta < 0)*/ {
-                            /** refresh entire plot for large numbers of new data Points */
-                            chargePlotLine.reset()
-                            chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(chargingPoints))
-                            main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
-                            main_charge_plot.invalidate()
-                        }
                     }
                 }
             }
@@ -277,25 +273,25 @@ class MainActivity : FragmentActivity() {
                     neoSelectedTripId = session?.driving_session_id
 
                     /** Add new plot points */
-                    session?.drivingPoints?.let { drivingPoints ->
+                    session?.drivingPoints?.let { points ->
                         val startIndex = consumptionPlotLine.getDataPointsSize()
                         when {
-                            startIndex == 0 && drivingPoints.isEmpty() -> {
+                            startIndex == 0 && points.isEmpty() -> {
                                 consumptionPlotLine.reset()
                             }
                             startIndex == 0 -> {
                                 consumptionPlotLine.reset()
-                                consumptionPlotLine.addDataPoints(DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints))
+                                consumptionPlotLine.addDataPoints(DataConverters.consumptionPlotLineFromDrivingPoints(points))
                             }
-                            startIndex != drivingPoints.size -> {
+                            startIndex != points.size -> {
                                 var prevDrivingPoint = consumptionPlotLine.lastItem()
 
-                                for (i in drivingPoints.indices) {
+                                for (i in points.indices) {
                                     if (i < startIndex) continue
 
                                     prevDrivingPoint = consumptionPlotLine.addDataPoint(
                                         DataConverters.consumptionPlotLineItemFromDrivingPoint(
-                                            drivingPoints[i],
+                                            points[i],
                                             prevDrivingPoint
                                         )
                                     ) ?: prevDrivingPoint
