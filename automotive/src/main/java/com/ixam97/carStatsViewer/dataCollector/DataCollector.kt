@@ -152,16 +152,23 @@ class DataCollector: Service() {
 
                 /** Check if location client has crashed or needs to be stopped or started */
                 var locationState = WatchdogState.DISABLED
-                if (CarStatsViewer.appPreferences.useLocation) {
-                    locationState = if (watchdogLocation == lastLocation || locationClientJob == null || lastLocation == null) {
-                        if (watchdogLocation == lastLocation) InAppLogger.w("[Watchdog] Location error: Location unchanged.")
-                        if (lastLocation == null) InAppLogger.w("[Watchdog] Location error: Location is null.")
-                        if (locationClientJob == null) InAppLogger.w("[Watchdog] Location error: Location client not running.")
 
-                        startLocationClient(5_000)
-                        WatchdogState.ERROR
-                    } else {
-                        WatchdogState.NOMINAL
+                if (CarStatsViewer.appPreferences.useLocation) {
+                    locationState = when {
+                        locationClientJob == null -> {
+                            InAppLogger.w("[Watchdog] Location error: Location client not running.")
+                            startLocationClient(5_000)
+                            WatchdogState.ERROR
+                        }
+                        watchdogLocation == lastLocation -> {
+                            InAppLogger.w("[Watchdog] Location error: Location is null.")
+                            WatchdogState.LIMITED
+                        }
+                        lastLocation == null -> {
+                            InAppLogger.w("[Watchdog] Location error: Location is null.")
+                            WatchdogState.LIMITED
+                        }
+                        else -> WatchdogState.NOMINAL
                     }
                     watchdogLocation = lastLocation
                 } else if (locationClientJob != null) {
