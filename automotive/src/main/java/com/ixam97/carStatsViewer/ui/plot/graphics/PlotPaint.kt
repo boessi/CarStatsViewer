@@ -46,7 +46,7 @@ class PlotPaint(
             val minMaxPaint = Paint(plotBackgroundPaint)
             minMaxPaint.color = Color.argb(96, Color.red(color), Color.green(color), Color.blue(color))
             minMaxPaint.strokeWidth = 3f
-            minMaxPaint.style = Paint.Style.STROKE
+            minMaxPaint.style = Paint.Style.FILL_AND_STROKE
 
             val highlightLabelPaint = Paint(basePaint)
             highlightLabelPaint.color = color
