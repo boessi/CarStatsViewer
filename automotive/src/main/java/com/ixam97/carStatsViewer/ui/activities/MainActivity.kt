@@ -36,7 +36,7 @@ import kotlin.math.roundToInt
 
 class MainActivity : FragmentActivity() {
     companion object {
-        const val DISTANCE_TRIP_DIVIDER = 5_000L
+        const val DISTANCE_TRIP_DIVIDER = 1_000L
         const val CONSUMPTION_DISTANCE_RESTRICTION = 10_000L
     }
 

@@ -44,21 +44,9 @@ class PlotPaint(
             plotBackgroundPaint.style = Paint.Style.FILL
 
             val minMaxPaint = Paint(plotBackgroundPaint)
-            minMaxPaint.color = plotGapPaint.color
+            minMaxPaint.color = Color.argb(96, Color.red(color), Color.green(color), Color.blue(color))
             minMaxPaint.strokeWidth = 3f
-            minMaxPaint.pathEffect = DashPathEffect(floatArrayOf(5f, 10f), 0f)
             minMaxPaint.style = Paint.Style.STROKE
-
-//            val plotSecondaryPaint = Paint(plotPaint)
-//            plotSecondaryPaint.color = Color.argb(160, Color.red(color), Color.green(color), Color.blue(color))
-//            plotSecondaryPaint.strokeWidth = 2f
-//
-//            val plotGapSecondaryPaint = Paint(plotSecondaryPaint)
-//            plotGapSecondaryPaint.pathEffect = DashPathEffect(floatArrayOf(5f, 10f), 0f)
-//
-//            val plotBackgroundSecondaryPaint = Paint(plotBackgroundPaint)
-//            plotBackgroundSecondaryPaint.color = Color.argb(32, Color.red(color), Color.green(color), Color.blue(color))
-//            plotBackgroundSecondaryPaint.strokeWidth = 2f
 
             val highlightLabelPaint = Paint(basePaint)
             highlightLabelPaint.color = color
