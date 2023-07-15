@@ -31,9 +31,6 @@ import kotlin.math.roundToInt
 class HttpLiveData (
     detailedLog : Boolean = true
 ): LiveDataApi("Webhook", R.string.settings_apis_http, detailedLog) {
-
-    var successCounter: Int = 0
-
     private fun addBasicAuth(connection: HttpURLConnection, username: String, password: String) {
         if (username == ""  && password == "") {
             return
@@ -191,10 +188,10 @@ class HttpLiveData (
         val gson = Gson()
         val liveDataJson = gson.toJson(dataSet)
 
-        val url = URL(AppPreferences(context).httpLiveDataURL) // + "?json=$jsonObject")
-        val connection = getConnection(url, username, password)
-
         try {
+            val url = URL(AppPreferences(context).httpLiveDataURL) // + "?json=$jsonObject")
+            val connection = getConnection(url, username, password)
+
             DataOutputStream(connection.outputStream).apply {
                 writeBytes(liveDataJson)
                 flush()
@@ -215,31 +212,28 @@ class HttpLiveData (
             }
 
             connection.inputStream.close()
-
-            if (responseCode >= 400) {
-                InAppLogger.e("[HTTP] Transmission failed. Status code $responseCode")
-                return ConnectionStatus.LIMITED
-            }
+            connection.disconnect()
         } catch (e: java.net.SocketTimeoutException) {
             InAppLogger.e("[HTTP] Network timeout error")
-            if (timeout < 30_000) {
-                timeout += 5_000
+            if (timeout < originalInterval * 5) {
+                timeout += originalInterval
                 InAppLogger.w("[HTTP] Interval increased to $timeout ms")
             }
-            successCounter = 0
             return ConnectionStatus.ERROR
         } catch (e: java.lang.Exception) {
-            InAppLogger.e("[HTTP] Connection error")
+            InAppLogger.e("[HTTP] Connection error ${e.message}")
             return ConnectionStatus.ERROR
-        } finally {
-            connection.disconnect()
         }
 
-        successCounter++
-        if (successCounter >= 5 && timeout > originalInterval) {
-            timeout -= 5_000
+        if (responseCode >= 400) {
+            InAppLogger.e("[HTTP] Transmission failed. Status code $responseCode")
+            return ConnectionStatus.ERROR
+        }
+
+        if (timeout > originalInterval) {
+            timeout -= originalInterval
             InAppLogger.i("[HTTP] Interval decreased to $timeout ms")
-            successCounter = 0
+            return ConnectionStatus.LIMITED
         }
 
         return ConnectionStatus.CONNECTED

@@ -27,8 +27,6 @@ class AbrpLiveData (
 
     var lastPackage: String = ""
 
-    var successCounter: Int = 0
-
     private fun send(
         abrpDataSet: AbrpDataSet,
         context: Context = CarStatsViewer.appContext
@@ -74,6 +72,7 @@ class AbrpLiveData (
             put("tlm", tlm)
 
         }
+
         try {
             DataOutputStream(con.outputStream).apply {
                 writeBytes(jsonObject.toString())
@@ -97,38 +96,32 @@ class AbrpLiveData (
                 InAppLogger.v(logString)
             }
 
-            if (responseCode == 200) {
-                successCounter++
-                if (successCounter >= 5 && timeout > originalInterval) {
-                    timeout -= 5_000
-                    InAppLogger.i("[ABRP] Interval decreased to $timeout ms")
-                    successCounter = 0
-                }
-            }
-
             con.inputStream.close()
             con.disconnect()
         } catch (e: java.net.SocketTimeoutException) {
             InAppLogger.e("[ABRP] Network timeout error")
-            if (timeout < 30_000) {
-                timeout += 5_000
+            if (timeout < originalInterval * 5) {
+                timeout += originalInterval
                 InAppLogger.w("[ABRP] Interval increased to $timeout ms")
             }
-            successCounter = 0
             return ConnectionStatus.ERROR
         } catch (e: java.lang.Exception) {
-            InAppLogger.e("[ABRP] Network connection error")
-            successCounter = 0
+            InAppLogger.e("[ABRP] Network connection error ${e.message}")
             return ConnectionStatus.ERROR
         }
-        if (responseCode == 200) {
-            return if (timeout == originalInterval)
-                ConnectionStatus.CONNECTED
-            else ConnectionStatus.LIMITED
+
+        if (responseCode >= 400) {
+            InAppLogger.e("[ABRP] Transmission failed. Status code $responseCode")
+            return ConnectionStatus.ERROR
         }
-        InAppLogger.e("[ABRP] Connection failed. Response code: $responseCode")
-        if (responseCode == 401) InAppLogger.e("          Auth error")
-        return ConnectionStatus.ERROR
+
+        if (timeout > originalInterval) {
+            timeout -= originalInterval
+            InAppLogger.i("[ABRP] Interval decreased to $timeout ms")
+            return ConnectionStatus.LIMITED
+        }
+
+        return ConnectionStatus.CONNECTED
     }
 
     override fun showSettingsDialog(context: Context) {
