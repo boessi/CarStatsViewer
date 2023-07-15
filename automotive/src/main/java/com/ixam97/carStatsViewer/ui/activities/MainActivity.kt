@@ -614,8 +614,8 @@ class MainActivity : FragmentActivity() {
     private fun openSummaryFragment() {
         CoroutineScope(Dispatchers.IO).launch {
             CarStatsViewer.tripDataSource.getActiveDrivingSessionsIdsMap()[appPreferences.mainViewTrip + 1]?.let {
-                val session = CarStatsViewer.tripDataSource.getFullDrivingSession(it)
-                runOnUiThread {
+                val session = CarStatsViewer.dataProcessor.selectedSessionDataFlow.value // CarStatsViewer.tripDataSource.getFullDrivingSession(it)
+                if (session != null) runOnUiThread {
                     main_fragment_container.visibility = View.VISIBLE
                     supportFragmentManager.commit {
                         setCustomAnimations(
