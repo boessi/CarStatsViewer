@@ -126,6 +126,18 @@ class PlotLine(
         }
     }
 
+    internal fun minDimension(dimension: PlotDimensionX, dataPoints: List<PlotLineItem>) : Any? {
+        return when {
+            dataPoints.isEmpty() -> null
+            else -> when (dimension) {
+                PlotDimensionX.DISTANCE -> dataPoints.minOf { it.Distance }
+                PlotDimensionX.TIME -> dataPoints.minOf { it.EpochTime }
+                PlotDimensionX.STATE_OF_CHARGE -> 0f
+                else -> null
+            }
+        }
+    }
+
     internal fun minDimension(dimension: PlotDimensionX, dimensionRestriction: Long? = null, dimensionShift: Long? = null, surplus: Boolean = false): Any? {
         return when {
             dataPoints.isEmpty() -> null
@@ -143,6 +155,18 @@ class PlotLine(
                     else -> dataPoints.minOf { it.value.EpochTime } + (dimensionShift ?: 0L)
                 }
                 PlotDimensionX.STATE_OF_CHARGE -> 0f
+            }
+        }
+    }
+
+    internal fun maxDimension(dimension: PlotDimensionX, dataPoints: List<PlotLineItem>) : Any? {
+        return when {
+            dataPoints.isEmpty() -> null
+            else -> when (dimension) {
+                PlotDimensionX.DISTANCE -> dataPoints.maxOf { it.Distance }
+                PlotDimensionX.TIME -> dataPoints.maxOf { it.EpochTime }
+                PlotDimensionX.STATE_OF_CHARGE -> 100f
+                else -> null
             }
         }
     }
