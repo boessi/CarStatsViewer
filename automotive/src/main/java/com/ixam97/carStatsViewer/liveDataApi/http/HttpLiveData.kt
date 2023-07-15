@@ -191,21 +191,22 @@ class HttpLiveData (
         val gson = Gson()
         val liveDataJson = gson.toJson(dataSet)
 
+        val url = URL(AppPreferences(context).httpLiveDataURL) // + "?json=$jsonObject")
+        val connection = getConnection(url, username, password)
+
         try {
-            val url = URL(AppPreferences(context).httpLiveDataURL) // + "?json=$jsonObject")
-            val connection = getConnection(url, username, password)
             DataOutputStream(connection.outputStream).apply {
                 writeBytes(liveDataJson)
                 flush()
                 close()
             }
+
             responseCode = connection.responseCode
 
             if (detailedLog) {
                 var logString = "[HTTP] Status: ${connection.responseCode}, Msg: ${connection.responseMessage}, Content:"
                 logString += try {
                     connection.inputStream.bufferedReader().use {it.readText()}
-
                 } catch (e: java.lang.Exception) {
                     "No response content"
                 }
@@ -214,7 +215,11 @@ class HttpLiveData (
             }
 
             connection.inputStream.close()
-            connection.disconnect()
+
+            if (responseCode >= 400) {
+                InAppLogger.e("[HTTP] Transmission failed. Status code $responseCode")
+                return ConnectionStatus.LIMITED
+            }
         } catch (e: java.net.SocketTimeoutException) {
             InAppLogger.e("[HTTP] Network timeout error")
             if (timeout < 30_000) {
@@ -226,13 +231,9 @@ class HttpLiveData (
         } catch (e: java.lang.Exception) {
             InAppLogger.e("[HTTP] Connection error")
             return ConnectionStatus.ERROR
+        } finally {
+            connection.disconnect()
         }
-
-        if (responseCode != 200) {
-            InAppLogger.e("[HTTP] Transmission failed. Status code $responseCode")
-            return ConnectionStatus.ERROR
-        }
-
 
         successCounter++
         if (successCounter >= 5 && timeout > originalInterval) {

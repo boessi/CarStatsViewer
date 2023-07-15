@@ -429,19 +429,25 @@ class DataProcessor {
         }
     }
 
-    suspend fun getDrivePointDeltaBetween(startEpoch: Long? = null, endEpoch: Long? = null): DeltaData {
-        val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(startEpoch ?: Long.MIN_VALUE, endEpoch ?: Long.MAX_VALUE);
+    suspend fun getDrivePointDeltaBetween(
+        startEpoch: Long? = null,
+        endEpoch: Long? = null
+    ): DeltaData {
+        val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(
+            startEpoch ?: Long.MIN_VALUE,
+            endEpoch ?: Long.MAX_VALUE
+        );
 
-         return when {
-             drivingPointList.isEmpty() -> DeltaData(refEpoch = startEpoch)
-             startEpoch == null -> DeltaData(refEpoch = drivingPointList.maxOf { it.driving_point_epoch_time } + 1)
-             else -> DeltaData(
-                 drivingPointList.map { it.energy_delta }.sum(),
-                 drivingPointList.map { it.distance_delta }.sum(),
-                 startEpoch,
-                 drivingPointList.maxOf { it.driving_point_epoch_time },
-                 drivingPointList.maxOf { it.driving_point_epoch_time } + 1
-             )
+        return when {
+            drivingPointList.isEmpty() -> DeltaData(refEpoch = startEpoch)
+            startEpoch == null -> DeltaData(refEpoch = drivingPointList.maxOf { it.driving_point_epoch_time } + 1)
+            else -> DeltaData(
+                drivingPointList.map { it.energy_delta }.sum(),
+                drivingPointList.map { it.distance_delta }.sum(),
+                startEpoch,
+                drivingPointList.maxOf { it.driving_point_epoch_time },
+                drivingPointList.maxOf { it.driving_point_epoch_time } + 1
+            )
         }
     }
 
