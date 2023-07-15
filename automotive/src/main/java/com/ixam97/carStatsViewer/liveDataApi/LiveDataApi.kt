@@ -85,7 +85,10 @@ abstract class LiveDataApi(
                 val newDelta = dataProcessor.getDrivePointDeltaBetween(delta?.refEpoch)
                 coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, newDelta)
 
-                if (connectionStatus == ConnectionStatus.CONNECTED) delta = newDelta
+                when (connectionStatus){
+                    ConnectionStatus.LIMITED, ConnectionStatus.CONNECTED -> delta = newDelta
+                    else -> { }
+                }
 
                 delay(timeout.toLong())
             }
