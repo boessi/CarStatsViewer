@@ -562,8 +562,8 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 val dataPoints = dataPoints(plotLine)
                 if (dataPoints?.isEmpty() != false) continue
 
-                val minDimension = plotLine.minDimension(dimension, dataPoints) ?: plotLine.minDimension(dimension, dimensionRestriction, dimensionShift) ?: continue
-                val maxDimension = plotLine.maxDimension(dimension, dataPoints) ?: plotLine.maxDimension(dimension, dimensionRestriction, dimensionShift) ?: continue
+                val minDimension = plotLine.minDimension(dimension, dimensionRestriction, dimensionShift) ?: continue
+                val maxDimension = plotLine.maxDimension(dimension, dimensionRestriction, dimensionShift) ?: continue
 
                 val minMaxDimension = plotLine.distanceDimensionMinMax(dimension, minDimension, maxDimension) ?: 0f
 
