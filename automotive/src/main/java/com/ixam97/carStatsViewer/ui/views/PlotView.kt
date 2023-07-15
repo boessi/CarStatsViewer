@@ -20,9 +20,11 @@ import com.ixam97.carStatsViewer.ui.plot.graphics.PlotLinePaint
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotMarkerPaint
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotPaint
 import com.ixam97.carStatsViewer.ui.plot.objects.*
+import com.ixam97.carStatsViewer.utils.InAppLogger
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
+import kotlin.system.measureTimeMillis
 
 class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     companion object {
@@ -422,13 +424,17 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        dataPointMap.clear()
-        drawBackground(canvas)
-        drawXLines(canvas)
-        drawYBaseLines(canvas)
-        drawPlot(canvas)
-        drawYLines(canvas)
+        val elapsed = measureTimeMillis {
+            super.onDraw(canvas)
+            dataPointMap.clear()
+            drawBackground(canvas)
+            drawXLines(canvas)
+            drawYBaseLines(canvas)
+            drawPlot(canvas)
+            drawYLines(canvas)
+        }
+
+        InAppLogger.v("[PLOT] render plot in ${elapsed / 1000f}s")
     }
 
     private var dataPointMap : HashMap<PlotLine, List<PlotLineItem>> = HashMap()
