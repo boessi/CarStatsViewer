@@ -38,7 +38,7 @@ class AppPreferences(
     private val SmtpPassword = AppPreference<String>(context.getString(R.string.preference_smtp_password_key), "", sharedPref)
     private val SmtpServer = AppPreference<String>(context.getString(R.string.preference_smtp_server_key), "", sharedPref)
     private val SmtpPort = AppPreference<String>(context.getString(R.string.preference_smtp_port_key), "", sharedPref)
-    private val LogTargetAddress = AppPreference<String>(context.getString(R.string.preference_log_target_address_key), "ixam97@ixam97.de", sharedPref)
+    private val LogTargetAddress = AppPreference<String>(context.getString(R.string.preference_log_target_address_key), "", sharedPref)
     private val LogUserName = AppPreference<String>(context.getString(R.string.preference_log_user_name_key), "", sharedPref)
     private val UseLocation = AppPreference<Boolean>(context.getString(R.string.preference_use_location_key), false, sharedPref)
     private val Autostart = AppPreference<Boolean>(context.getString(R.string.preference_autostart_key), false, sharedPref)
