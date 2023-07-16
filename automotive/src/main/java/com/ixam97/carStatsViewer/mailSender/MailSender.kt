@@ -30,11 +30,15 @@ class MailSender(
         props.setProperty("mail.transport.protocol", "smtp")
         props.setProperty("mail.host", server)
         props["mail.smtp.auth"] = "true"
-        props["mail.smtp.port"] = "465"
+        props["mail.smtp.port"] = port
         props["mail.smtp.starttls.enable"] = "true"
-        props["mail.smtp.socketFactory.port"] = port
-        props["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
-        props["mail.smtp.socketFactory.fallback"] = "false"
+
+        if (port != "587") {
+            props["mail.smtp.socketFactory.port"] = port
+            props["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
+            props["mail.smtp.socketFactory.fallback"] = "false"
+        }
+
         props.setProperty("mail.smtp.quitwait", "false")
         session = Session.getDefaultInstance(props, this)
     }
