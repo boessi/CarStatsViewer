@@ -178,6 +178,10 @@ class HttpLiveData (
         }
     }
 
+    override fun isEnabled(): Boolean {
+        return AppPreferences(CarStatsViewer.appContext).httpLiveDataEnabled
+    }
+
     private fun send(dataSet: HttpDataSet, context: Context = CarStatsViewer.appContext): ConnectionStatus {
         val username = AppPreferences(context).httpLiveDataUsername
         val password = AppPreferences(context).httpLiveDataPassword

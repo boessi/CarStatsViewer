@@ -422,18 +422,23 @@ class DataProcessor {
     ): DeltaData {
         val drivingPointList = CarStatsViewer.tripDataSource.getDrivingPointsBetween(
             startEpoch ?: Long.MIN_VALUE,
-            endEpoch ?: Long.MAX_VALUE
+            endEpoch ?: System.currentTimeMillis()
         )
 
         return when {
-            drivingPointList.isEmpty() -> DeltaData(refEpoch = startEpoch)
-            startEpoch == null -> DeltaData(refEpoch = drivingPointList.maxOf { it.driving_point_epoch_time } + 1)
-            else -> DeltaData(
-                drivingPointList.map { it.energy_delta }.sum(),
-                drivingPointList.map { it.distance_delta }.sum(),
-                TimeUnit.NANOSECONDS.toMillis(drivingPointList.mapNotNull { it.time_delta }.sum()),
-                drivingPointList.maxOf { it.driving_point_epoch_time } + 1
-            )
+            drivingPointList.isEmpty() -> {
+                InAppLogger.v("[DrivePointDeltaBetween] no data poits between $startEpoch and $endEpoch")
+                DeltaData(refEpoch = startEpoch)
+            }
+            else -> {
+                InAppLogger.v("[DrivePointDeltaBetween] ${drivingPointList.size} data points between $startEpoch and $endEpoch, max epoch ${drivingPointList.maxOf { it.driving_point_epoch_time }}")
+                DeltaData(
+                    drivingPointList.map { it.energy_delta }.sum(),
+                    drivingPointList.map { it.distance_delta }.sum(),
+                    TimeUnit.NANOSECONDS.toMillis(drivingPointList.mapNotNull { it.time_delta }.sum()),
+                    drivingPointList.maxOf { it.driving_point_epoch_time } + 1
+                )
+            }
         }
     }
 

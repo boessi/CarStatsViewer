@@ -18,6 +18,8 @@ abstract class LiveDataApi(
     var detailedLog: Boolean
     ){
 
+    private var delta: DeltaData? = null
+
     /**
      * Indicates the current connection status of the API
      *      0: Unused
@@ -79,15 +81,21 @@ abstract class LiveDataApi(
     fun requestFlow(serviceScope: CoroutineScope, dataProcessor: DataProcessor, interval: Int): Flow<Unit> {
         timeout = interval
         originalInterval = interval
-        return flow {
-            var delta : DeltaData = DeltaData(refEpoch = System.currentTimeMillis())
-            while (true) {
-                val newDelta = dataProcessor.getDrivePointDeltaBetween(delta.refEpoch)
-                coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, newDelta)
 
-                when (connectionStatus){
-                    ConnectionStatus.LIMITED, ConnectionStatus.CONNECTED -> delta = newDelta
-                    else -> { }
+        delta = DeltaData(refEpoch = System.currentTimeMillis())
+
+        return flow {
+            while (true) {
+                if (isEnabled()){
+                    val newDelta = dataProcessor.getDrivePointDeltaBetween(delta!!.refEpoch)
+                    coroutineSendNow(dataProcessor.realTimeData, dataProcessor.selectedSessionDataFlow.value, newDelta)
+
+                    when (connectionStatus){
+                        ConnectionStatus.LIMITED, ConnectionStatus.CONNECTED -> delta = newDelta
+                        else -> { }
+                    }
+                } else {
+                    delta = DeltaData(refEpoch = System.currentTimeMillis())
                 }
 
                 delay(timeout.toLong())
@@ -108,4 +116,6 @@ abstract class LiveDataApi(
             apiState = currentApiStateMap.toMap()
         ))
     }
+
+    protected abstract fun isEnabled(): Boolean
 }

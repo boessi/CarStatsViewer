@@ -171,4 +171,8 @@ class AbrpLiveData (
             ))
         }
     }
+
+    override fun isEnabled(): Boolean {
+        return AppPreferences(CarStatsViewer.appContext).abrpUseApi
+    }
 }
