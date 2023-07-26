@@ -202,4 +202,9 @@ class LocalTripDataSource(
         tripDao.upsertChargingSession(chargingSession)
     }
 
+    override suspend fun cleanup() {
+        tripDao.clearFutureDrivingPoints(System.currentTimeMillis())
+        tripDao.clearFutureChargingPoints(System.currentTimeMillis())
+    }
+
 }

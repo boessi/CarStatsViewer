@@ -11,7 +11,6 @@ import com.ixam97.carStatsViewer.emulatorPowerSign
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotLineMarkerType
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.Ticker
-import com.ixam97.carStatsViewer.utils.TimestampSynchronizer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -469,7 +468,7 @@ class DataProcessor {
             if (mTimestamp == 0L) return@launch
 
             val drivingPoint = DrivingPoint(
-                driving_point_epoch_time = TimestampSynchronizer.getSystemTimeFromNanosTimestamp(mTimestamp),
+                driving_point_epoch_time = System.currentTimeMillis(),
                 energy_delta = mUsedEnergy.toFloat(),
                 distance_delta = mDrivenDistance.toFloat(),
                 time_delta = mTime,

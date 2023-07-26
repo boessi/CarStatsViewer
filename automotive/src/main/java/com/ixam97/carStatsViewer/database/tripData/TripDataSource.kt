@@ -60,4 +60,6 @@ interface TripDataSource {
     suspend fun getCompleteChargingSessionById(sessionId: Long): ChargingSession
 
     suspend fun updateChargingSession(chargingSession: ChargingSession)
+
+    suspend fun cleanup()
 }

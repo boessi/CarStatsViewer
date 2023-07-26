@@ -21,6 +21,7 @@ import com.ixam97.carStatsViewer.database.log.LogEntry
 import com.ixam97.carStatsViewer.database.tripData.TripType
 import com.ixam97.carStatsViewer.mailSender.MailSender
 import com.ixam97.carStatsViewer.adapters.LogAdapter
+import com.ixam97.carStatsViewer.database.tripData.LocalTripDataSource
 import com.ixam97.carStatsViewer.ui.views.MultiSelectWidget
 import com.ixam97.carStatsViewer.utils.*
 import kotlinx.android.synthetic.main.activity_debug.*
@@ -200,6 +201,15 @@ class DebugActivity : FragmentActivity() {
                     InAppLogger.resetLog()
                     InAppLogger.i("Cleared log")
                     loadLog()
+                }
+            }
+        }
+
+        log_reset_database.setOnClickListener {
+            activityScope.launch {
+                withContext(Dispatchers.IO) {
+                    InAppLogger.i("cleanup database: remove future points")
+                    CarStatsViewer.tripDataSource?.cleanup()
                 }
             }
         }

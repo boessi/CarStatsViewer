@@ -29,6 +29,15 @@
         <View style="@style/filler"/>
 
         <ImageButton
+            android:id="@+id/log_reset_database"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_kill"
+            android:background="@android:color/transparent"
+            android:layout_marginVertical="15dp"
+            android:layout_marginEnd="10dp"/>
+
+        <ImageButton
             android:id="@+id/debug_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

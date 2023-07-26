@@ -100,8 +100,14 @@ interface TripDao {
     @Query("DELETE FROM DrivingPoint WHERE driving_point_epoch_time < :earliestEpochTime")
     fun clearOldDrivingPoints(earliestEpochTime: Long): Int
 
+    @Query("DELETE FROM DrivingPoint WHERE driving_point_epoch_time > :newestEpochTime")
+    fun clearFutureDrivingPoints(newestEpochTime: Long): Int
+
     @Query("DELETE FROM ChargingPoint WHERE charging_point_epoch_time < :earliestEpochTime")
     fun clearOldChargingPoints(earliestEpochTime: Long): Int
+
+    @Query("DELETE FROM ChargingPoint WHERE charging_point_epoch_time > :newestEpochTime")
+    fun clearFutureChargingPoints(newestEpochTime: Long): Int
 
     @Query("DELETE FROM ChargingSession WHERE start_epoch_time < :earliestEpochTime")
     fun clearOldChargingSessions(earliestEpochTime: Long): Int
