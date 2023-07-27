@@ -72,6 +72,7 @@ class HttpLiveData (
         val username = layout.findViewById<EditText>(R.id.http_live_data_username)
         val password = layout.findViewById<EditText>(R.id.http_live_data_password)
         val httpLiveDataEnabled = layout.findViewById<Switch>(R.id.http_live_data_enabled)
+        val httpLiveDataLocation = layout.findViewById<Switch>(R.id.http_live_data_location)
         val abrpDebug = layout.findViewById<Switch>(R.id.http_live_data_abrp)
 
         val httpLiveDataSettingsDialog = AlertDialog.Builder(context).apply {
@@ -92,9 +93,13 @@ class HttpLiveData (
         val dialog = httpLiveDataSettingsDialog.show()
 
         httpLiveDataEnabled.isChecked = AppPreferences(context).httpLiveDataEnabled
+        httpLiveDataLocation.isChecked = AppPreferences(context).httpLiveDataLocation
         abrpDebug.isChecked = AppPreferences(context).httpLiveDataSendABRPDataset
         httpLiveDataEnabled.setOnClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked
+        }
+        httpLiveDataLocation.setOnClickListener {
+            AppPreferences(context).httpLiveDataLocation = httpLiveDataLocation.isChecked
         }
         abrpDebug.setOnClickListener {
             AppPreferences(context).httpLiveDataSendABRPDataset = abrpDebug.isChecked
@@ -132,6 +137,7 @@ class HttpLiveData (
         if (!realTimeData.isInitialized()) return
 
         connectionStatus = try {
+            val useLocation = AppPreferences(CarStatsViewer.appContext).httpLiveDataLocation
             send(
                 HttpDataSet(
                     apiVersion = 2,
@@ -151,9 +157,10 @@ class HttpLiveData (
                     realTimeBatteryLevel = realTimeData.batteryLevel!!,
                     realTimeStateOfCharge = realTimeData.stateOfCharge!!,
                     realTimeAmbientTemperature = realTimeData.ambientTemperature!!,
-                    realTimeLat = realTimeData.lat,
-                    realTimeLon = realTimeData.lon,
-                    realTimeAlt = realTimeData.alt,
+
+                    realTimeLat = if (useLocation) realTimeData.lat else null,
+                    realTimeLon = if (useLocation) realTimeData.lon else null,
+                    realTimeAlt = if (useLocation) realTimeData.alt else null,
 
                     // Session Data
                     drivingSession?.driving_session_id,
