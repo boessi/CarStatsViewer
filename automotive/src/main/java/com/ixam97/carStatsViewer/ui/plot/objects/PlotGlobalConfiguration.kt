@@ -55,6 +55,7 @@ object PlotGlobalConfiguration {
                 PlotHighlightMethod.AVG_BY_VALUE,
                 "Wh/km",
                 DimensionSmoothing = 0.02f,
+                DimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE,
             ),
         )
 
