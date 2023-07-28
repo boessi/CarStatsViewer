@@ -38,8 +38,8 @@ class PlotLine(
         }
 
         if (prev != null && dataPoint.TimeDelta != null && (dataPoint.EpochTime - prev.EpochTime) > TimeUnit.NANOSECONDS.toMillis(dataPoint.TimeDelta!!) * 5) {
-            prev.Marker = PlotLineMarkerType.END_SESSION
-            dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
+            // prev.Marker = PlotLineMarkerType.END_SESSION
+            // dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
         }
 
         return when {
