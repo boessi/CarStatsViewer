@@ -51,10 +51,10 @@ object PlotGlobalConfiguration {
             ),
             PlotDimensionY.CONSUMPTION to PlotLineConfiguration(
                 PlotRange(-200f, 600f, -200f, 600f, 100f, 0f),
-                DimensionSmoothing = 0.02f,
                 PlotLineLabelFormat.NUMBER,
                 PlotHighlightMethod.AVG_BY_VALUE,
-                "Wh/km"
+                "Wh/km",
+                DimensionSmoothing = 0.02f,
             ),
         )
 
