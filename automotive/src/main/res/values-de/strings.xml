@@ -2,9 +2,10 @@
 <resources>
 
     <string-array name="changes_0_25_1">
-        <item>Anpassungen an der UI, insbesondere in der Tripzusammenfassung</item>
-        <item>Die Weitergabe des Standortes kann nun für jede API einzeln festgelegt werden</item>
-        <item>Kleinere Bugfixes</item>
+        <item>Anpassungen an der UI, insbesondere in der Tripzusammenfassung.</item>
+        <item>Fahrzeugkonfiguration für MY24 hinzugefügt.</item>
+        <item>Die Weitergabe des Standortes kann nun für jede API einzeln festgelegt werden.</item>
+        <item>Kleinere Bugfixes.</item>
     </string-array>
 
     <string-array name="changes_0_25_0">
@@ -160,7 +161,7 @@
     <string name="smtp_description">SMTP-Logindaten des E-Mail-Providers eingeben. Diese werden genutzt, um gespeicherte Statistiken und Debug-Logs an eine vom Nutzer angegebene Zieladresse zu senden.</string>
     <string name="smtp_address">E-Mail Adresse</string>
     <string name="smtp_password">E-Mail Passwort</string>
-    <string name="smtp_server">SMTP Server URL</string>
+    <string name="smtp_server">SMTP Server Hostname</string>
     <string name="smtp_port">SMTP Server Port</string>
     <string name="smtp_use_STARTTLS">STARTTLS nutzen</string>
 
@@ -168,6 +169,11 @@
     <string name="SinceChargeData">Seit letzter Ladung</string>
     <string name="AutoTripData">Automatischer Trip</string>
     <string name="CurrentMonthData">Aktueller Monat</string>
+
+    <string name="CurrentTripData_short">Manuell</string>
+    <string name="SinceChargeData_short">Seit Ladung</string>
+    <string name="AutoTripData_short">Automatisch</string>
+    <string name="CurrentMonthData_short">Monat</string>
 
     <string-array name="trip_type_names">
         <item>Unbekannter Triptyp</item>

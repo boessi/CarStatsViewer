@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.core.view.drawToBitmap
@@ -18,6 +19,7 @@ import com.ixam97.carStatsViewer.*
 import com.ixam97.carStatsViewer.dataCollector.DataCollector
 import com.ixam97.carStatsViewer.dataProcessor.DrivingState
 import com.ixam97.carStatsViewer.database.tripData.TripType
+import com.ixam97.carStatsViewer.databinding.ActivityMainBinding
 import com.ixam97.carStatsViewer.ui.fragments.SummaryFragment
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotLinePaint
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotPaint
@@ -53,23 +55,23 @@ class MainActivity : FragmentActivity() {
         ),
     )
     private val consumptionPlotLinePaint  = PlotLinePaint(
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.primary_plot_color), PlotView.textSize),
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color), PlotView.textSize),
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color_alt), PlotView.textSize)
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.primary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color_alt), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size))
     ) { appPreferences.consumptionPlotSecondaryColor }
 
     private val chargePlotLine = PlotLine(
         PlotLineConfiguration(
-            PlotRange(0f, 5f, 0f, 160f, 5f),
+            PlotRange(0f, 5f, 0f, 240f, 5f),
             PlotLineLabelFormat.FLOAT,
             PlotHighlightMethod.AVG_BY_TIME,
             "kW"
         )
     )
     private val chargePlotLinePaint = PlotLinePaint(
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.charge_plot_color), PlotView.textSize),
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color), PlotView.textSize),
-        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color_alt), PlotView.textSize)
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.charge_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+        PlotPaint.byColor(CarStatsViewer.appContext.getColor(R.color.secondary_plot_color_alt), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size))
     ) { appPreferences.chargePlotSecondaryColor }
 
     private lateinit var context: Context
@@ -128,8 +130,13 @@ class MainActivity : FragmentActivity() {
         setGageVisibilities(appPreferences.consumptionPlotVisibleGages, appPreferences.consumptionPlotVisibleGages)
     }
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding = ActivityMainBinding.inflate(LayoutInflater.from(this))
+        val view = binding.root
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -206,41 +213,43 @@ class MainActivity : FragmentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 CarStatsViewer.dataProcessor.currentChargingSessionDataFlow.collectLatest { chargingSession ->
-                    // InAppLogger.i("Charging update")
+                    // InAppLogger.i("########## Charging update ##########")
                     chargingSession?.let {
                         neoChargedEnergy = it.charged_energy
                         neoChargeTime = it.chargeTime
                     }
-                    chargingSession?.chargingPoints?.let { points ->
-                        val startIndex = chargePlotLine.getDataPointsSize()
-                        when {
-                            startIndex == 0 && points.isEmpty() -> {
-                                chargePlotLine.reset()
-                            }
-                            startIndex == 0 -> {
-                                chargePlotLine.reset()
-                                chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(points))
-                            }
-                            startIndex != points.size -> {
-                                var prevDrivingPoint = chargePlotLine.lastItem()
+                    chargingSession?.chargingPoints?.let { chargingPoints ->
+                        var sizeDelta = chargingPoints.size - chargePlotLine.getDataPointsSize()
 
-                                for (i in points.indices) {
-                                    if (i < startIndex) continue
+                        // InAppLogger.d("[NEO] Updating charging plot. Size delta: $sizeDelta")
 
-                                    prevDrivingPoint = chargePlotLine.addDataPoint(
-                                        DataConverters.chargePlotLineItemFromChargingPoint(
-                                            points[i],
-                                            prevDrivingPoint
-                                        )
-                                    ) ?: prevDrivingPoint
-                                }
-                            }
-                        }
-
+                        chargePlotLine.reset()
+                        chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(chargingPoints))
                         main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
-                        main_charge_plot.dimensionRestrictionMin = TimeUnit.MINUTES.toMillis(1)
-                        main_charge_plot.dimensionRestrictionMax = TimeUnit.MINUTES.toMillis(10)
                         main_charge_plot.invalidate()
+
+                        if (sizeDelta in 1..9 && chargingPoints.last().point_marker_type == null) {
+                            while (sizeDelta > 0) {
+                                val prevChargingPoint = if (chargePlotLine.getDataPointsSize() > 0) {
+                                    chargePlotLine.getDataPoints(PlotDimensionX.TIME).last()
+                                } else null
+                                chargePlotLine.addDataPoint(
+                                    DataConverters.chargePlotLineItemFromChargingPoint(
+                                        chargingPoints[chargingPoints.size - sizeDelta],
+                                        prevChargingPoint
+                                    )
+                                )
+                                sizeDelta --
+                            }
+                            main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
+                            main_charge_plot.invalidate()
+                        } else /*if (sizeDelta > 10 || sizeDelta < 0)*/ {
+                            /** refresh entire plot for large numbers of new data Points */
+                            chargePlotLine.reset()
+                            chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(chargingPoints))
+                            main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
+                            main_charge_plot.invalidate()
+                        }
                     }
                 }
             }
@@ -259,7 +268,7 @@ class MainActivity : FragmentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 CarStatsViewer.dataProcessor.selectedSessionDataFlow.collectLatest { session ->
-
+                    // InAppLogger.i("########## Session state changed ##########")
                     neoDistance = session?.driven_distance?:0.0
                     neoEnergy = session?.used_energy?:0.0
                     neoTime = session?.drive_time?:0
@@ -276,28 +285,42 @@ class MainActivity : FragmentActivity() {
                     neoSelectedTripId = session?.driving_session_id
 
                     /** Add new plot points */
-                    session?.drivingPoints?.let { points ->
+
+                    session?.drivingPoints?.let { drivingPoints ->
                         val startIndex = consumptionPlotLine.getDataPointsSize()
+                        var prevDrivingPoint = consumptionPlotLine.lastItem()
+                        var lastItemIndex = drivingPoints.withIndex().find { it.value.driving_point_epoch_time == prevDrivingPoint?.EpochTime }?.index
+
                         when {
-                            startIndex == 0 && points.isEmpty() -> {
+                            startIndex == 0 && drivingPoints.isEmpty() -> {
                                 consumptionPlotLine.reset()
                             }
-                            startIndex == 0 -> {
+                            startIndex == 0
+                            || (prevDrivingPoint?.Distance?:0f) > 20_000
+                            || lastItemIndex == null
+                            || drivingPoints.size - lastItemIndex > 100 -> {
+                                InAppLogger.d("Refreshing entire consumption plot.")
                                 consumptionPlotLine.reset()
-                                consumptionPlotLine.addDataPoints(DataConverters.consumptionPlotLineFromDrivingPoints(points))
+                                lifecycleScope.launch {
+                                    val dataPoints = DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints, 10_000f)
+                                    runOnUiThread {
+                                        consumptionPlotLine.addDataPoints(dataPoints)
+                                    }
+                                }
                             }
-                            startIndex != points.size -> {
-                                var prevDrivingPoint = consumptionPlotLine.lastItem()
+                            startIndex > 0 -> {
+                                // if (lastItemIndex == null) lastItemIndex = drivingPoints.size
+                                // InAppLogger.v("Last plot item index: $lastItemIndex, drivingPoints size: ${drivingPoints.size}")
 
-                                for (i in points.indices) {
-                                    if (i < startIndex) continue
-
+                                while (lastItemIndex < drivingPoints.size - 1) {
+                                    InAppLogger.i("Data point added to plot")
                                     prevDrivingPoint = consumptionPlotLine.addDataPoint(
                                         DataConverters.consumptionPlotLineItemFromDrivingPoint(
-                                            points[i],
+                                            drivingPoints[lastItemIndex + 1],
                                             prevDrivingPoint
                                         )
                                     ) ?: prevDrivingPoint
+                                    lastItemIndex++
                                 }
                             }
                         }
@@ -318,11 +341,12 @@ class MainActivity : FragmentActivity() {
         InAppLogger.d("Main view created")
 
 
-        PlotView.textSize = resources.getDimension(R.dimen.reduced_font_size)
-        PlotView.xMargin = resources.getDimension(R.dimen.plot_x_margin).toInt()
-        PlotView.yMargin = resources.getDimension(R.dimen.plot_y_margin).toInt()
-        GageView.valueTextSize = resources.getDimension(R.dimen.gage_value_text_size)
-        GageView.descriptionTextSize = resources.getDimension(R.dimen.gage_desc_text_size)
+        // PlotView.textSize = resources.getDimension(R.dimen.reduced_font_size)
+        // InAppLogger.i("Plot text size: ${PlotView.textSize}")
+        // PlotView.xMargin = resources.getDimension(R.dimen.plot_x_margin).toInt()
+        // PlotView.yMargin = resources.getDimension(R.dimen.plot_y_margin).toInt()
+        // GageView.valueTextSize = resources.getDimension(R.dimen.gage_value_text_size)
+        // GageView.descriptionTextSize = resources.getDimension(R.dimen.gage_desc_text_size)
 
         setContentView(R.layout.activity_main)
 
@@ -383,15 +407,36 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun setGageLimits() {
-        if (appPreferences.bstEdition) {
-            main_power_gage.maxValue = 350f
-            main_power_gage.minValue = -175f
-        } else if (appPreferences.driveTrain == 2) {
-            main_power_gage.maxValue = 300f
-            main_power_gage.minValue = -150f
-        } else {
-            main_power_gage.maxValue = 170f
-            main_power_gage.minValue = -100f
+        main_power_gage.minValue = -100f
+
+        main_power_gage.maxValue = when (appPreferences.performanceUpgrade) {
+            true -> 350f
+            false -> {
+                when (appPreferences.driveTrain) {
+                    0 -> {
+                        if (appPreferences.modelYear <= 2) 150f
+                        else 200f
+                    }
+                    1 -> {
+                        if (appPreferences.modelYear <= 2) 170f
+                        else 220f
+                    }
+                    2 -> {
+                        if (appPreferences.modelYear <= 2) 300f
+                        else 310f
+                    }
+                    else -> 300f
+                }
+            }
+        }
+
+        main_charge_gage.maxValue = when (appPreferences.driveTrain) {
+            0 -> 135f
+            1, 2 -> {
+                if (appPreferences.modelYear <= 2) 155f
+                else 205f
+            }
+            else -> 155f
         }
     }
 

@@ -18,16 +18,34 @@ object DataConverters {
 
     fun consumptionPlotLineFromDrivingPoints(drivingPoints: List<DrivingPoint>, maxDistance: Float? = null): List<PlotLineItem> {
         val plotLine = mutableListOf<PlotLineItem>()
+        var distanceSum = 0f
         var startIndex = 0
 
-        drivingPoints.forEachIndexed { index, drivingPoint ->
-            if (index - startIndex == 0) {
-                plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, null))
-            } else {
-                plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, plotLine[index - startIndex - 1]))
+        var startTime = System.nanoTime()
+        if (maxDistance != null ){
+            var currentIndex = drivingPoints.size - 1
+            while (distanceSum < maxDistance + 200f) {
+                distanceSum += drivingPoints[currentIndex].distance_delta
+                if (currentIndex <= 0 ) break
+                currentIndex--
+            }
+            startIndex = currentIndex
+            InAppLogger.d("Start index set to $startIndex / ${drivingPoints.size}")
+            InAppLogger.d("Start index found in ${System.nanoTime() - startTime} ns")
+        }
+        startTime = System.nanoTime()
+        var loopCount = 0
+        drivingPoints.drop(startIndex).forEachIndexed { index, drivingPoint ->
+            loopCount++
+            if (index == 0) plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, null))
+            else {
+                if ((drivingPoint.point_marker_type == 2 && plotLine[index - 1].Marker == PlotLineMarkerType.END_SESSION))
+                    plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint.copy(point_marker_type = 0), plotLine[index - 1]))
+                else
+                    plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, plotLine[index - 1]))
             }
         }
-        
+        InAppLogger.i("Plot line construction took ${System.nanoTime() - startTime} ns, $loopCount loops")
         return plotLine
     }
 

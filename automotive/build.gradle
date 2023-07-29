@@ -8,13 +8,25 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId "com.ixam97.carStatsViewer"
         minSdkVersion 29
         targetSdkVersion 33
-        versionCode 167
-        versionName "0.25.1.0010"
+        versionCode 169
+        versionName "0.25.2.0000"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    flavorDimensions "version"
+
+    productFlavors {
+        stable {
+            dimension "version"
+            applicationId "com.ixam97.carStatsViewer"
+        }
+
+        dev {
+            dimension "version"
+            applicationId "com.ixam97.carStatsViewer_dev"
+        }
     }
 
     buildTypes {
@@ -23,6 +35,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    buildFeatures {
+        viewBinding true
+    }
+
     packagingOptions {
         resources {
             pickFirsts += ['META-INF/LICENSE.md', 'META-INF/NOTICE.md']

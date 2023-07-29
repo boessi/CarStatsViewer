@@ -68,15 +68,15 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
     )
 
     private val consumptionPlotLinePaint = PlotLinePaint(
-    PlotPaint.byColor(applicationContext.getColor(R.color.primary_plot_color), PlotView.textSize),
-    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color), PlotView.textSize),
-    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color_alt), PlotView.textSize)
+    PlotPaint.byColor(applicationContext.getColor(R.color.primary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color_alt), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size))
     ) { appPreferences.consumptionPlotSecondaryColor }
 
     private val chargePlotLinePaint = PlotLinePaint(
-    PlotPaint.byColor(applicationContext.getColor(R.color.charge_plot_color), PlotView.textSize),
-    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color), PlotView.textSize),
-    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color_alt), PlotView.textSize)
+    PlotPaint.byColor(applicationContext.getColor(R.color.charge_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
+    PlotPaint.byColor(applicationContext.getColor(R.color.secondary_plot_color_alt), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size))
     ) { appPreferences.chargePlotSecondaryColor }
 
     private val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
@@ -299,16 +299,23 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
             }
         }
 
-        when (session.session_type) {
-            TripType.MANUAL -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_hand))
-            TripType.SINCE_CHARGE -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_charger))
-            TripType.AUTO -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_day))
-            TripType.MONTH -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_month))
-        }
+
 
         if ((session.end_epoch_time?:0) > 0 ) {
+            when (session.session_type) {
+                TripType.MANUAL -> summary_title.setCompoundDrawables(applicationContext.getDrawable(R.drawable.ic_hand),null,null, null)
+                TripType.SINCE_CHARGE -> summary_title.setCompoundDrawables(applicationContext.getDrawable(R.drawable.ic_charger),null,null, null)
+                TripType.AUTO -> summary_title.setCompoundDrawables(applicationContext.getDrawable(R.drawable.ic_day),null,null, null)
+                TripType.MONTH -> summary_title.setCompoundDrawables(applicationContext.getDrawable(R.drawable.ic_month),null,null, null)
+            }
             summary_title.text = "${StringFormatters.getDateString(Date(session.start_epoch_time))}, ${resources.getStringArray(R.array.trip_type_names)[session.session_type]}"
         } else {
+            when (session.session_type) {
+                TripType.MANUAL -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_hand))
+                TripType.SINCE_CHARGE -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_charger))
+                TripType.AUTO -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_day))
+                TripType.MONTH -> summary_type_icon.setImageDrawable(applicationContext.getDrawable(R.drawable.ic_month))
+            }
             summary_title.visibility = View.GONE
             summary_trip_selector.visibility = View.VISIBLE
             summary_selector_title.text = resources.getStringArray(R.array.trip_type_names)[session.session_type]
@@ -417,7 +424,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
 
         chargePlotLine.reset()
         completedChargingSessions[progress].chargingPoints?.let {
-            chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(it))
+            if (it.isNotEmpty()) chargePlotLine.addDataPoints(DataConverters.chargePlotLineFromChargingPoints(it))
         }
 
         summary_charge_plot_view.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes((completedChargingSessions[progress].end_epoch_time?:0) - completedChargingSessions[progress].start_epoch_time) / 5) + 1) * 5 + 1
