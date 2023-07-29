@@ -37,7 +37,7 @@ class PlotLine(
             dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
         }
 
-        if (prev != null && dataPoint.TimeDelta != null && (dataPoint.EpochTime - prev.EpochTime).absoluteValue > TimeUnit.SECONDS.toMillis(10)) {
+        if (prev != null && dataPoint.TimeDelta != null && (dataPoint.EpochTime - prev.EpochTime) > TimeUnit.SECONDS.toMillis(10)) {
             prev.Marker = PlotLineMarkerType.END_SESSION
             dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
         }
