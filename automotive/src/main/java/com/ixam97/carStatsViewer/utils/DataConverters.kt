@@ -18,29 +18,16 @@ object DataConverters {
 
     fun consumptionPlotLineFromDrivingPoints(drivingPoints: List<DrivingPoint>, maxDistance: Float? = null): List<PlotLineItem> {
         val plotLine = mutableListOf<PlotLineItem>()
-        var distanceSum = 0f
         var startIndex = 0
 
-        if (maxDistance != null ) run distanceLimit@ {
-            drivingPoints.reversed().forEachIndexed { index, drivingPoint ->
-                distanceSum += drivingPoint.distance_delta
-                if (distanceSum > maxDistance + 1_000) {
-                    startIndex = drivingPoints.size - index
-                    return@distanceLimit
-                }
-            }
-        }
-
         drivingPoints.forEachIndexed { index, drivingPoint ->
-            if (index < startIndex) return@forEachIndexed
-            if (index - startIndex == 0) plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, null))
-            else {
-                if ((drivingPoint.point_marker_type == 2 && plotLine[index - startIndex - 1].Marker == PlotLineMarkerType.END_SESSION))
-                    plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint.copy(point_marker_type = 0), plotLine[index - startIndex - 1]))
-                else
-                    plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, plotLine[index - startIndex - 1]))
+            if (index - startIndex == 0) {
+                plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, null))
+            } else {
+                plotLine.add(consumptionPlotLineItemFromDrivingPoint(drivingPoint, plotLine[index - startIndex - 1]))
             }
         }
+        
         return plotLine
     }
 
