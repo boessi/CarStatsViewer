@@ -239,6 +239,7 @@ class MainActivity : FragmentActivity() {
 
                         main_charge_plot.dimensionRestriction = TimeUnit.MINUTES.toMillis((TimeUnit.MILLISECONDS.toMinutes(chargingSession.chargeTime) / 5) + 1) * 5 + 1
                         main_charge_plot.dimensionRestrictionMin = TimeUnit.MINUTES.toMillis(1)
+                        main_charge_plot.dimensionRestrictionMax = TimeUnit.MINUTES.toMillis(10)
                         main_charge_plot.invalidate()
                     }
                 }
@@ -377,6 +378,7 @@ class MainActivity : FragmentActivity() {
             CONSUMPTION_DISTANCE_RESTRICTION
         )
         main_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER)
+        main_consumption_plot.dimensionRestrictionMax = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER) * 10
         main_consumption_plot.invalidate()
     }
 
@@ -503,6 +505,7 @@ class MainActivity : FragmentActivity() {
             CONSUMPTION_DISTANCE_RESTRICTION
         )
         main_consumption_plot.dimensionRestrictionMin = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER)
+        main_consumption_plot.dimensionRestrictionMax = appPreferences.distanceUnit.asUnit(DISTANCE_TRIP_DIVIDER) * 10
         main_consumption_plot.dimensionSmoothing = 0.02f
         main_consumption_plot.dimensionSmoothingType = PlotDimensionSmoothingType.PERCENTAGE
         main_consumption_plot.sessionGapRendering = PlotSessionGapRendering.JOIN
