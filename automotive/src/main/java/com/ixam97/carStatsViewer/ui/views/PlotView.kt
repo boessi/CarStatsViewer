@@ -93,6 +93,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     var dimensionYAdditional: ArrayList<PlotDimensionY?>? = null
 
     var dimensionRestrictionMin: Long? = null
+    var dimensionRestrictionMax: Long? = null
     var dimensionRestriction: Long? = null
         set(value) {
             val diff = value != field
@@ -391,7 +392,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         val restriction = dimensionRestriction ?: return true
-        val min = dimensionRestrictionMin ?: return true
+        val max = dimensionRestrictionMax ?: dimensionRestrictionMin ?: return true
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -404,7 +405,7 @@ class PlotView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 touchDimensionShiftByPixel = restriction.toFloat() / width.toFloat()
 
                 val dimensionMax = plotLines.mapNotNull { it.first.distanceDimension(dimension) }.maxOfOrNull { it }?.toLong() ?: return true
-                touchDimensionMax = dimensionMax + (min - dimensionMax % min)
+                touchDimensionMax = dimensionMax + (max - dimensionMax % max)
 
                 touchGesture = true
             }
