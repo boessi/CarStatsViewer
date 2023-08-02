@@ -29,6 +29,7 @@ import com.ixam97.carStatsViewer.ui.plot.enums.*
 import com.ixam97.carStatsViewer.utils.DataConverters
 import com.ixam97.carStatsViewer.utils.StringFormatters
 import com.ixam97.carStatsViewer.ui.views.PlotView
+import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.applyTypeface
 import kotlinx.android.synthetic.main.fragment_summary.*
 import kotlinx.coroutines.*
@@ -224,7 +225,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
                 }
                 if (session.drivingPoints == null || session.chargingSessions == null) {
                     val fullSession = CarStatsViewer.tripDataSource.getFullDrivingSession(sessionId = session.driving_session_id)
-
+                    InAppLogger.d("[SUM] Loading driving points and charging sessions")
                     session.drivingPoints = fullSession.drivingPoints
                     session.chargingSessions = fullSession.chargingSessions
 
@@ -265,8 +266,10 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
                 }
 
                 session.chargingSessions?.let {  chargingSessions ->
-                    if (chargingSessions.isNotEmpty()) {
-                        completedChargingSessions = chargingSessions.filter { it.end_epoch_time != null }
+                    completedChargingSessions = if (chargingSessions.isNotEmpty()) {
+                        chargingSessions.filter { it.end_epoch_time != null }
+                    } else {
+                        listOf()
                     }
                     requireActivity().runOnUiThread {
 
@@ -468,7 +471,9 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
         CoroutineScope(Dispatchers.IO).launch {
             CarStatsViewer.dataProcessor.changeSelectedTrip(index + 1)
             CarStatsViewer.tripDataSource.getActiveDrivingSessionsIdsMap()[index + 1]?.let {
+                InAppLogger.d("[SUM] Changing trip")
                 session = CarStatsViewer.tripDataSource.getFullDrivingSession(it)
+                InAppLogger.d("Charging sessions: ${session.chargingSessions}")
                 requireActivity().runOnUiThread {
                     applySession(session)
                 }
