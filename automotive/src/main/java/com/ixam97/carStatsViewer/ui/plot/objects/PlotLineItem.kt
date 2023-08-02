@@ -5,7 +5,7 @@ import com.ixam97.carStatsViewer.ui.plot.enums.PlotDimensionY
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotLineMarkerType
 import kotlin.math.roundToInt
 
-class PlotLineItem (
+data class PlotLineItem (
     var Value: Float,
     val EpochTime: Long,
     var TimeDelta: Long?,
