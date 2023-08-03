@@ -102,7 +102,6 @@ class PlotLine(
             TimeDelta = (dataPointLeft.TimeDelta?:0) + (dataPointRight.TimeDelta?:0),
             DistanceDelta = newDistanceDelta,
             StateOfChargeDelta = (dataPointRight.StateOfCharge - dataPointLeft.StateOfCharge),
-            AltitudeDelta = (dataPointLeft.AltitudeDelta?:0.0f) + (dataPointRight.AltitudeDelta?:0.0f),
             Value = newValue,
             Marker = null
         )
