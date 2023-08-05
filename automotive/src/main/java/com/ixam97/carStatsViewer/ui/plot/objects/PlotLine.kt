@@ -89,20 +89,11 @@ class PlotLine(
     }
 
     private fun combineDataPoints(dataPointLeft: PlotLineItem, dataPointRight: PlotLineItem): PlotLineItem {
-        val newDistanceDelta = (dataPointLeft.DistanceDelta?:0.0f) + (dataPointRight.DistanceDelta?:0.0f)
-
-        // This needs to be changed once we switch to energy instead of consumption as value!!!
-        val newValue = when {
-            (dataPointLeft.DistanceDelta?:0.0f) == 0.0f || (dataPointRight.DistanceDelta?:0.0f) == 0.0f -> 0.0f
-            else -> {
-                ((dataPointLeft.Value * dataPointLeft.DistanceDelta!!) + (dataPointRight.Value * dataPointRight.DistanceDelta!!)) / newDistanceDelta
-            }
-        }
-        return dataPointRight.copy(
+         return dataPointRight.copy(
             TimeDelta = (dataPointLeft.TimeDelta?:0) + (dataPointRight.TimeDelta?:0),
-            DistanceDelta = newDistanceDelta,
+            DistanceDelta = (dataPointLeft.DistanceDelta?:0.0f) + (dataPointRight.DistanceDelta?:0.0f),
             StateOfChargeDelta = (dataPointRight.StateOfCharge - dataPointLeft.StateOfCharge),
-            Value = newValue,
+            Value = dataPointLeft.Value + dataPointRight.Value,
             Marker = null
         )
     }
