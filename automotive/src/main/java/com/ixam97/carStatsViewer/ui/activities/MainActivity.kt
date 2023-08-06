@@ -360,7 +360,8 @@ class MainActivity : FragmentActivity() {
         setupDefaultUi()
         setUiEventListeners()
 
-        main_button_screenshot.setImageResource(R.drawable.ic_camera)
+        main_button_perf.isEnabled = false
+        main_button_perf.setColorFilter(getColor(R.color.disabled_tint), PorterDuff.Mode.SRC_IN)
 
         if (appPreferences.versionString != BuildConfig.VERSION_NAME) {
             CarStatsViewer.getChangelogDialog(this).show()
@@ -639,17 +640,6 @@ class MainActivity : FragmentActivity() {
             main_consumption_plot.invalidate()
             // DataManager.chargedEnergy = 0f
             // DataManager.chargeTime = 0L
-        }
-
-        main_button_screenshot.setOnClickListener {
-            // throw Exception("Intentional crash")
-            InAppLogger.i("Debug")
-            lifecycleScope.launch {
-                CarStatsViewer.screenshotBitmap = master_layout.drawToBitmap()
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Screenshot taken", Toast.LENGTH_SHORT).show()
-                }
-            }
         }
 
         main_button_history.setOnClickListener {
