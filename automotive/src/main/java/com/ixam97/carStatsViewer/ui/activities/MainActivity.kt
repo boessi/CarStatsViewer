@@ -305,7 +305,7 @@ class MainActivity : FragmentActivity() {
                                 InAppLogger.d("Refreshing entire consumption plot.")
                                 consumptionPlotLine.reset()
                                 lifecycleScope.launch {
-                                    val dataPoints = DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints, 10_000f)
+                                    val dataPoints = DataConverters.consumptionPlotLineFromDrivingPoints(drivingPoints)
                                     runOnUiThread {
                                         consumptionPlotLine.addDataPoints(dataPoints)
                                     }
