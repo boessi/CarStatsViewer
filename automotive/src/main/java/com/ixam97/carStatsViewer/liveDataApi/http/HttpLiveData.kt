@@ -140,7 +140,7 @@ class HttpLiveData (
             val useLocation = AppPreferences(CarStatsViewer.appContext).httpLiveDataLocation
             send(
                 HttpDataSet(
-                    apiVersion = 2,
+                    apiVersion = "2.1",
                     appVersion = BuildConfig.VERSION_NAME,
 
                     timestamp = System.currentTimeMillis(),
@@ -212,15 +212,22 @@ class HttpLiveData (
             if (detailedLog) {
                 var logString = "[HTTP] Status: ${connection.responseCode}, Msg: ${connection.responseMessage}, Content:"
                 logString += try {
-                    connection.inputStream.bufferedReader().use {it.readText()}
+                    if (connection.responseCode in 100..399) {
+                        connection.inputStream.bufferedReader().use {it.readText()}
+                    } else {
+                        connection.errorStream.bufferedReader().use {it.readText()}
+                    }
                 } catch (e: java.lang.Exception) {
                     "No response content"
                 }
-                if (dataSet.realTimeLat == null) logString += ". No valid location!"
                 InAppLogger.d(logString)
             }
 
-            connection.inputStream.close()
+            if (connection.responseCode in 100..399) {
+                connection.inputStream.close()
+            } else {
+                connection.errorStream.close()
+            }
             connection.disconnect()
         } catch (e: java.net.SocketTimeoutException) {
             InAppLogger.e("[HTTP] Network timeout error")

@@ -23,6 +23,7 @@ import com.ixam97.carStatsViewer.mailSender.MailSender
 import com.ixam97.carStatsViewer.adapters.LogAdapter
 import com.ixam97.carStatsViewer.database.tripData.LocalTripDataSource
 import com.ixam97.carStatsViewer.ui.views.MultiSelectWidget
+import com.ixam97.carStatsViewer.ui.views.SnackbarWidget
 import com.ixam97.carStatsViewer.utils.*
 import kotlinx.android.synthetic.main.activity_debug.*
 import kotlinx.coroutines.*
@@ -103,6 +104,7 @@ class DebugActivity : FragmentActivity() {
                 log_progress_bar.visibility = View.VISIBLE
                 CoroutineScope(Dispatchers.Default).launch() {
                     try {
+                        // throw Exception("Test")
                         val sender = if (appPreferences.smtpAddress != "" && appPreferences.smtpPassword != "" && appPreferences.smtpServer != "") {
                             senderMail = appPreferences.smtpAddress
                             MailSender(
@@ -164,12 +166,20 @@ class DebugActivity : FragmentActivity() {
 
                         runOnUiThread {
                             log_progress_bar.visibility = View.GONE
-                            Toast.makeText(this@DebugActivity, "Log sent to $mailAdr", Toast.LENGTH_LONG).show()
+                            SnackbarWidget.Builder(this@DebugActivity, "Log sent to $mailAdr")
+                                .setDuration(3_000)
+                                .setStartDrawable(R.drawable.ic_mail)
+                                .show()
+                            // Toast.makeText(this@DebugActivity, "Log sent to $mailAdr", Toast.LENGTH_LONG).show()
                         }
                     } catch (e: java.lang.Exception) {
                         runOnUiThread {
                             log_progress_bar.visibility = View.GONE
-                            Toast.makeText(this@DebugActivity, "Sending E-Mail failed. See log.", Toast.LENGTH_LONG).show()
+                            SnackbarWidget.Builder(this@DebugActivity, "Sending E-Mail failed. See log.")
+                                .setDuration(3_000)
+                                .setIsError(true)
+                                .show()
+                            // Toast.makeText(this@DebugActivity, "Sending E-Mail failed. See log.", Toast.LENGTH_LONG).show()
                         }
                         InAppLogger.e(e.stackTraceToString())
                     }

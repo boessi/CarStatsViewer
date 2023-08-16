@@ -159,7 +159,7 @@ class AbrpLiveData (
         tokenDialog.show()
     }
 
-    override fun sendNow(realTimeData: RealTimeData, drivingSession: DrivingSession?, deltaData: DeltaData?) {
+    override suspend fun sendNow(realTimeData: RealTimeData, drivingSession: DrivingSession?, deltaData: DeltaData?) {
         if (!AppPreferences(CarStatsViewer.appContext).abrpUseApi) {
             connectionStatus = ConnectionStatus.UNUSED
             return

@@ -1,7 +1,9 @@
 package com.ixam97.carStatsViewer.liveDataApi.http
 
+import com.ixam97.carStatsViewer.database.tripData.DrivingPoint
+
 data class HttpDataSet(
-    val apiVersion: Int = 2,
+    val apiVersion: String = "2.1",
     val appVersion: String,
 
     val timestamp: Long,
