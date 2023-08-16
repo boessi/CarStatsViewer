@@ -176,7 +176,9 @@ class HttpLiveData (
                     // DeltaValues
                     deltaData?.usedEnergy,
                     deltaData?.traveledDistance,
-                    deltaData?.timeSpan
+                    deltaData?.timeSpan,
+
+                    deltaData?.drivingPoints
                 )
             )
         } catch (e: java.lang.Exception) {

@@ -37,5 +37,7 @@ data class HttpDataSet(
     // Delta Values
     val deltaUsedEnergy: Float?,
     val deltaTraveledDistance: Float?,
-    val deltaTimeSpan: Long?
+    val deltaTimeSpan: Long?,
+
+    val drivingPoints: List<DrivingPoint>? = null
 )

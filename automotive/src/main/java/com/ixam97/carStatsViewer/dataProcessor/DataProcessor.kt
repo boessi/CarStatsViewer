@@ -8,7 +8,6 @@ import com.ixam97.carStatsViewer.utils.TimeTracker
 import com.ixam97.carStatsViewer.database.tripData.*
 import com.ixam97.carStatsViewer.emulatorMode
 import com.ixam97.carStatsViewer.emulatorPowerSign
-import com.ixam97.carStatsViewer.liveDataApi.http.HttpLiveData
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotLineMarkerType
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.Ticker
@@ -436,7 +435,8 @@ class DataProcessor {
                     drivingPointList.map { it.energy_delta }.sum(),
                     drivingPointList.map { it.distance_delta }.sum(),
                     TimeUnit.NANOSECONDS.toMillis(drivingPointList.mapNotNull { it.time_delta }.sum()),
-                    drivingPointList.maxOf { it.driving_point_epoch_time } + 1
+                    drivingPointList.maxOf { it.driving_point_epoch_time } + 1,
+                    drivingPointList
                 )
             }
         }
