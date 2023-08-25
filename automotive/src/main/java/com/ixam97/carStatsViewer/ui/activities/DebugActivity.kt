@@ -217,15 +217,6 @@ class DebugActivity : FragmentActivity() {
             }
         }
 
-        log_reset_database.setOnClickListener {
-            activityScope.launch {
-                withContext(Dispatchers.IO) {
-                    InAppLogger.i("cleanup database: remove future points")
-                    CarStatsViewer.tripDataSource?.cleanup()
-                }
-            }
-        }
-
         debug_settings.setOnClickListener {
             val settingsDialog = AlertDialog.Builder(ContextThemeWrapper(this, R.style.redTextEdit)).apply {
                 val layout = LayoutInflater.from(context).inflate(R.layout.dialog_debug_settings, null)
