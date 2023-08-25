@@ -14,9 +14,9 @@ import com.ixam97.carStatsViewer.appPreferences.AppPreferences
 import com.ixam97.carStatsViewer.dataProcessor.IgnitionState
 import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
-import com.ixam97.carStatsViewer.dataProcessor.StaticVehicleData
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import com.ixam97.carStatsViewer.liveDataApi.LiveDataApi
+import com.ixam97.carStatsViewer.ui.views.MultiButtonWidget
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.StringFormatters
 import java.io.DataOutputStream
@@ -74,6 +74,7 @@ class HttpLiveData (
         val httpLiveDataEnabled = layout.findViewById<Switch>(R.id.http_live_data_enabled)
         val httpLiveDataLocation = layout.findViewById<Switch>(R.id.http_live_data_location)
         val abrpDebug = layout.findViewById<Switch>(R.id.http_live_data_abrp)
+        val apiTypeMultiButton = layout.findViewById<MultiButtonWidget>(R.id.http_live_data_type)
 
         val httpLiveDataSettingsDialog = AlertDialog.Builder(context).apply {
             setView(layout)
@@ -95,6 +96,9 @@ class HttpLiveData (
         httpLiveDataEnabled.isChecked = AppPreferences(context).httpLiveDataEnabled
         httpLiveDataLocation.isChecked = AppPreferences(context).httpLiveDataLocation
         abrpDebug.isChecked = AppPreferences(context).httpLiveDataSendABRPDataset
+        apiTypeMultiButton.selectedIndex = AppPreferences(context).httpApiTelemetryType
+
+
         httpLiveDataEnabled.setOnClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked
         }
@@ -103,6 +107,9 @@ class HttpLiveData (
         }
         abrpDebug.setOnClickListener {
             AppPreferences(context).httpLiveDataSendABRPDataset = abrpDebug.isChecked
+        }
+        apiTypeMultiButton.setOnIndexChangedListener {
+            AppPreferences(context).httpApiTelemetryType = apiTypeMultiButton.selectedIndex
         }
 
         url.setText(AppPreferences(context).httpLiveDataURL)
