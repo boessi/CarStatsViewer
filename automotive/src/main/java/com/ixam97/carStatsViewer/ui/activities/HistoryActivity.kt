@@ -423,6 +423,5 @@ class HistoryActivity  : FragmentActivity() {
 //            }
 //
 //        }
-
-    }
+//    }
 }
