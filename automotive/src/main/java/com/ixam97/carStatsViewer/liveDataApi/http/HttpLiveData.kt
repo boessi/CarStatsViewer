@@ -3,6 +3,7 @@ package com.ixam97.carStatsViewer.liveDataApi.http
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
@@ -45,6 +46,7 @@ class HttpLiveData (
         con.requestMethod = "POST"
         con.setRequestProperty("Content-Type", "application/json;charset=UTF-8")
         con.setRequestProperty("Accept","application/json")
+        con.setRequestProperty("User-Agent", "CarStatsViewer %s".format(BuildConfig.VERSION_NAME))
         con.connectTimeout = timeout
         con.readTimeout = timeout
         con.doOutput = true
@@ -75,10 +77,12 @@ class HttpLiveData (
         val httpLiveDataLocation = layout.findViewById<Switch>(R.id.http_live_data_location)
         val abrpDebug = layout.findViewById<Switch>(R.id.http_live_data_abrp)
         val apiTypeMultiButton = layout.findViewById<MultiButtonWidget>(R.id.http_live_data_type)
+        val confirmButton = layout.findViewById<Button>(R.id.http_live_data_confirm)
 
         val httpLiveDataSettingsDialog = AlertDialog.Builder(context).apply {
             setView(layout)
 
+            /*
             setPositiveButton("OK") { _, _ ->
                 AppPreferences(context).httpLiveDataURL = url.text.toString()
                 AppPreferences(context).httpLiveDataUsername = username.text.toString()
@@ -87,6 +91,7 @@ class HttpLiveData (
 
             setTitle(context.getString(R.string.settings_apis_http))
             setMessage(context.getString(R.string.http_description))
+            */
             setCancelable(true)
             create()
         }
@@ -98,6 +103,14 @@ class HttpLiveData (
         abrpDebug.isChecked = AppPreferences(context).httpLiveDataSendABRPDataset
         apiTypeMultiButton.selectedIndex = AppPreferences(context).httpApiTelemetryType
 
+        confirmButton.isSelected = true
+
+        confirmButton.setOnClickListener {
+            AppPreferences(context).httpLiveDataURL = url.text.toString()
+            AppPreferences(context).httpLiveDataUsername = username.text.toString()
+            AppPreferences(context).httpLiveDataPassword = password.text.toString()
+            dialog.cancel()
+        }
 
         httpLiveDataEnabled.setOnClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked

@@ -3,6 +3,9 @@ package com.ixam97.carStatsViewer.dataProcessor
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.core.graphics.drawable.toBitmap
 import com.ixam97.carStatsViewer.AutoStartReceiver
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.Defines
@@ -302,8 +305,9 @@ class DataProcessor {
                     CarStatsViewer.appContext,
                     CarStatsViewer.RESTART_CHANNEL_ID
                 )
-                    .setContentTitle("Don't forget your mobile phone!")
-                    .setSmallIcon(R.drawable.ic_phone)
+                    .setContentTitle(CarStatsViewer.appContext.getString(R.string.notification_phone))
+                    .setContentText(CarStatsViewer.appContext.getString(R.string.notification_valuables))
+                    .setSmallIcon(R.drawable.ic_notification_phone)
                     .setOngoing(false)
                     .setCategory(Notification.CATEGORY_CALL)
                     .build()

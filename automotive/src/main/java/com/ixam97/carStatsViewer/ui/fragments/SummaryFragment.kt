@@ -93,7 +93,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
         super.onViewCreated(view, savedInstanceState)
 
         CarStatsViewer.typefaceRegular?.let {
-            applyTypeface(view)
+            // applyTypeface(view)
         }
 
         setupPlots()
@@ -348,7 +348,9 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
             summary_selector_title.text = resources.getStringArray(R.array.trip_type_names)[session.session_type]
             summary_selected_trip_bar.forEach { bar ->
                 bar.background = applicationContext.getColor(R.color.disable_background).toDrawable()
+                // bar.background = applicationContext.getColor(R.color.club_night_variant).toDrawable()
             }
+            // summary_selected_trip_bar[appPreferences.mainViewTrip].background = applicationContext.getDrawable(R.drawable.bg_button_selected)
             summary_selected_trip_bar[appPreferences.mainViewTrip].background = primaryColor.toColor().toDrawable()
         }
 
