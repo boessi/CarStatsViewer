@@ -325,7 +325,7 @@ class PlotLine(
                 }
             }
             PlotHighlightMethod.AVG_BY_VALUE -> {
-                PlotLineItem.byDimensionY(dataPointsNonNull.map { it.first }, secondaryDimension)
+                PlotLineItem.byDimensionY(dataPoints, secondaryDimension)
             }
             else -> null
         }

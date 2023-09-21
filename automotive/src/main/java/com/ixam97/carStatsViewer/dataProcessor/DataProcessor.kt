@@ -233,7 +233,7 @@ class DataProcessor {
 
             /** only relevant in emulator since power is not updated periodically */
             if (emulatorMode && !carPropertiesData.CurrentPower.isInitialValue) {
-                val energyDelta = emulatorPowerSign * (carPropertiesData.CurrentPower.lastValue as Float) / 1_000f * (property.timeDelta / 3.6E12)
+                val energyDelta = emulatorPowerSign * (carPropertiesData.CurrentPower.value as Float) / 1_000f * (property.timeDelta / 3.6E12)
                 pointUsedEnergy += energyDelta
                 valueUsedEnergy += energyDelta
 
