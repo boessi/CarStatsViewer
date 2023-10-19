@@ -8,8 +8,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.ixam97.carStatsViewer.*
+import com.ixam97.carStatsViewer.appPreferences.AppPreference
+import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotGlobalConfiguration
 import com.ixam97.carStatsViewer.utils.applyTypeface
+import com.ixam97.carStatsViewer.utils.setContentViewAndTheme
 import kotlinx.android.synthetic.main.activity_settings.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -25,7 +28,8 @@ class SettingsActivity : FragmentActivity() {
 
     override fun startActivity(intent: Intent?) {
         super.startActivity(intent)
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        if (intent?.hasExtra("noTransition") == false)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
     override fun onResume() {
@@ -46,8 +50,7 @@ class SettingsActivity : FragmentActivity() {
                 }
             }
         }
-
-        setContentView(R.layout.activity_settings)
+        setContentViewAndTheme(this, R.layout.activity_settings)
 
         CarStatsViewer.typefaceMedium?.let {
             applyTypeface(settings_activity)
@@ -74,8 +77,12 @@ class SettingsActivity : FragmentActivity() {
         settings_switch_autostart.isChecked = appPreferences.autostart
         settings_switch_phone_reminder.isChecked = appPreferences.phoneNotification
         settings_switch_alt_layout.isChecked = appPreferences.altLayout
+        settings_switch_theme.isChecked = when (appPreferences.colorTheme) {
+            1 -> true
+            else -> false
+        }
 
-        settings_version_text.text = "Car Stats Viewer %s\n(%s)".format(BuildConfig.VERSION_NAME, BuildConfig.APPLICATION_ID)
+        settings_version_text.text = "Car Stats Viewer %s (%s)".format(BuildConfig.VERSION_NAME, BuildConfig.APPLICATION_ID)
 
         settings_button_back.setOnClickListener() {
             finish()
@@ -137,6 +144,11 @@ class SettingsActivity : FragmentActivity() {
         settings_version_text.setOnClickListener {
             startActivity(Intent(this, DebugActivity::class.java))
             overridePendingTransition(R.anim.slide_in_up, R.anim.stay_still)
+        }
+
+        settings_switch_theme.setOnClickListener {
+            appPreferences.colorTheme = if (settings_switch_theme.isChecked) 1 else 0
+            finish()
         }
     }
 }

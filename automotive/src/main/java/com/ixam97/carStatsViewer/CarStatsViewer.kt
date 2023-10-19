@@ -52,6 +52,8 @@ class CarStatsViewer : Application() {
 
         var screenshotBitmap = arrayListOf<Bitmap>()
 
+        var fontsLoaded = false
+
         lateinit var appContext: Context
         lateinit var liveDataApis: ArrayList<LiveDataApi>
         lateinit var appPreferences: AppPreferences
@@ -200,10 +202,9 @@ class CarStatsViewer : Application() {
 
         InAppLogger.d("Screen width: ${resources.configuration.screenWidthDp}dp")
 
-        var fontsLoaded = false
-
         CoroutineScope(Dispatchers.IO).launch {
             InAppLogger.i("Available OEM fonts:")
+
             val systemFonts = SystemFonts.getAvailableFonts()
             systemFonts.filter{ it.file?.name?.contains("volvo", true) == true }.forEach {
                 InAppLogger.i("    ${it.file?.name}")
@@ -229,19 +230,23 @@ class CarStatsViewer : Application() {
                     }
                 }
             }
+
+
+            MultiButtonWidget.isPolestar = isPolestarTypeface
+
+            typefaceRegular?.let {
+                PlotPaint.typeface = it
+                PlotPaint.letterSpacing = -0.025f
+            }
+
             fontsLoaded = true
         }
 
-        while (!fontsLoaded) {
-            // Wait for fonts to be loaded before initializing trip database
-        }
+        // while (!fontsLoaded) {
+        //     // Wait for fonts to be loaded before initializing trip database
+        // }
 
-        MultiButtonWidget.isPolestar = isPolestarTypeface
 
-        typefaceRegular?.let {
-            PlotPaint.typeface = it
-            PlotPaint.letterSpacing = -0.025f
-        }
 
         val MIGRATION_5_6 = object: Migration(5, 6) {
             override fun migrate(database: SupportSQLiteDatabase) {
