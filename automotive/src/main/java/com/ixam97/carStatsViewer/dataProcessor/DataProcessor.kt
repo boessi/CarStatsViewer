@@ -362,26 +362,6 @@ class DataProcessor {
         }
     }
 
-    /** Get the current running time for each trip type and charging session from the timers */
-    /*
-    fun updateTime() {
-        // Update trip data regularly to keep data up to date. Does not write to database.
-        updateTripDataValues(DrivingState.DRIVE)
-
-        localSessions.forEachIndexed { index, session ->
-            val drivingPoints = session.drivingPoints
-            localSessions[index] = session.copy(
-                drive_time = timerMap[session.session_type]?.getTime()?:0L,
-                last_edited_epoch_time = System.currentTimeMillis()
-            )
-            localSessions[index].drivingPoints = drivingPoints
-            if (session.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
-                _selectedSessionDataFlow.value = localSessions[index]
-            }
-        }
-    }
-     */
-
     /** Make sure every type of trip has an active trip */
     suspend fun checkTrips() {
         val drivingSessionsIdsMap = CarStatsViewer.tripDataSource.getActiveDrivingSessionsIdsMap()
@@ -529,9 +509,6 @@ class DataProcessor {
                     drivingPoints?.add(drivingPoint)
                     localSessions[index] = session.copy(last_edited_epoch_time = System.currentTimeMillis())
                     localSessions[index].drivingPoints = drivingPoints
-                    if (session.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
-                        _selectedSessionDataFlow.value = localSessions[index]
-                    }
                 }
                 localSessions
             }
@@ -587,9 +564,6 @@ class DataProcessor {
                     last_edited_epoch_time = System.currentTimeMillis()
                 )
                 localSessions[index].drivingPoints = drivingPoints
-                if (localSession.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
-                    _selectedSessionDataFlow.value = localSessions[index]
-                }
             }
             localSessions
         }
