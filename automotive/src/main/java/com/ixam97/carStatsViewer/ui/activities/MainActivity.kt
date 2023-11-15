@@ -436,6 +436,17 @@ class MainActivity : FragmentActivity() {
             main_consumption_gage.maxValue = distanceUnit.asUnit(60f)
         }
 
+        main_distance_selector.run {
+            val unitString = appPreferences.distanceUnit.unit()
+            buttonNames = listOf(
+                "20 $unitString",
+                "40 $unitString",
+                "100 $unitString",
+                "",
+            )
+        }
+
+        setPrimaryConsumptionPlotDimension(appPreferences.mainPrimaryDimensionRestriction)
         PlotGlobalConfiguration.updateDistanceUnit(distanceUnit, consumptionUnit)
         main_consumption_plot.dimensionRestriction = distanceUnit.asUnit(
             CONSUMPTION_DISTANCE_RESTRICTION
@@ -479,6 +490,14 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    fun setPrimaryConsumptionPlotDimension(index: Int) {
+        val newDistance = when (index) {
+            1 -> 40_000L
+            2 -> 100_000L
+            else -> 20_000L
+        }
+        main_consumption_plot.dimensionRestriction = appPreferences.distanceUnit.asUnit(newDistance)
+    }
     fun setSecondaryConsumptionPlotDimension(secondaryConsumptionDimension: Int) {
 
         val constraintSet = ConstraintSet()
@@ -487,26 +506,26 @@ class MainActivity : FragmentActivity() {
         when (secondaryConsumptionDimension) {
             1 -> {
                 main_button_secondary_dimension.text = getString(R.string.main_secondary_axis, getString(R.string.main_speed))
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.TOP, R.id.main_image_button_speed, ConstraintSet.TOP)
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.BOTTOM, R.id.main_image_button_speed, ConstraintSet.BOTTOM)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.LEFT, R.id.main_image_button_speed, ConstraintSet.LEFT)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.RIGHT, R.id.main_image_button_speed, ConstraintSet.RIGHT)
                 main_secondary_dimension_indicator.isVisible = true
             }
             2 -> {
                 main_button_secondary_dimension.text = getString(R.string.main_secondary_axis, getString(R.string.main_SoC))
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.TOP, R.id.main_image_button_soc, ConstraintSet.TOP)
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.BOTTOM, R.id.main_image_button_soc, ConstraintSet.BOTTOM)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.LEFT, R.id.main_image_button_soc, ConstraintSet.LEFT)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.RIGHT, R.id.main_image_button_soc, ConstraintSet.RIGHT)
                 main_secondary_dimension_indicator.isVisible = true
             }
             3 -> {
                 main_button_secondary_dimension.text = getString(R.string.main_secondary_axis, getString(R.string.plot_dimensionY_ALTITUDE))
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.TOP, R.id.main_image_button_alt, ConstraintSet.TOP)
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.BOTTOM, R.id.main_image_button_alt, ConstraintSet.BOTTOM)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.LEFT, R.id.main_image_button_alt, ConstraintSet.LEFT)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.RIGHT, R.id.main_image_button_alt, ConstraintSet.RIGHT)
                 main_secondary_dimension_indicator.isVisible = true
             }
             else -> {
                 main_button_secondary_dimension.text = getString(R.string.main_secondary_axis, "-")
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.TOP, R.id.main_image_button_speed, ConstraintSet.BOTTOM)
-                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.BOTTOM, R.id.main_image_button_speed, ConstraintSet.BOTTOM)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.LEFT, R.id.main_image_button_speed, ConstraintSet.RIGHT)
+                constraintSet.connect(R.id.main_secondary_dimension_indicator, ConstraintSet.RIGHT, R.id.main_image_button_speed, ConstraintSet.RIGHT)
                 main_secondary_dimension_indicator.visibility = View.GONE
             }
         }
@@ -611,6 +630,14 @@ class MainActivity : FragmentActivity() {
         main_consumption_plot.dimensionYPrimary = PlotDimensionY.CONSUMPTION
         main_consumption_plot.addPlotLine(consumptionPlotLine, consumptionPlotLinePaint)
 
+        setPrimaryConsumptionPlotDimension(appPreferences.mainPrimaryDimensionRestriction)
+
+        main_distance_selector.run {
+            selectedIndex = appPreferences.mainPrimaryDimensionRestriction
+                .coerceAtMost(2)
+                .coerceAtLeast(0)
+        }
+
         main_consumption_plot.dimension = PlotDimensionX.DISTANCE
         main_consumption_plot.dimensionRestriction = appPreferences.distanceUnit.asUnit(
             CONSUMPTION_DISTANCE_RESTRICTION
@@ -704,6 +731,11 @@ class MainActivity : FragmentActivity() {
             currentIndex = if (currentIndex == 3) 0 else 3
             setSecondaryConsumptionPlotDimension(currentIndex)
             appPreferences.secondaryConsumptionDimension = currentIndex
+        }
+
+        main_distance_selector.setOnIndexChangedListener {
+            appPreferences.mainPrimaryDimensionRestriction = main_distance_selector.selectedIndex
+            setPrimaryConsumptionPlotDimension(appPreferences.mainPrimaryDimensionRestriction)
         }
 
         main_button_summary.setOnClickListener {

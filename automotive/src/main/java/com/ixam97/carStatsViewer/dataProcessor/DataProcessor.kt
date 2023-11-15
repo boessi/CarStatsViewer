@@ -20,9 +20,14 @@ import com.ixam97.carStatsViewer.ui.plot.enums.PlotLineMarkerType
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.Ticker
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
@@ -62,7 +67,10 @@ class DataProcessor {
      * List of local copies of the current trips. Used for storing sum values and saving them to
      * disk less frequently. This should prevent hiccups when adding sums of distance and energy.
      */
-    private var localSessions: MutableList<DrivingSession> = mutableListOf()
+    // private var localSessions: MutableList<DrivingSession> = mutableListOf()
+
+    private val _localSessionsState = MutableStateFlow<MutableList<DrivingSession>>(mutableListOf())
+    val localSessionsState: StateFlow<MutableList<DrivingSession>> = _localSessionsState.asStateFlow()
 
     private var localChargingSession: ChargingSession? = null
 
@@ -120,11 +128,14 @@ class DataProcessor {
          * updateDrivingDataPoint as well!
          */
         return CoroutineScope(Dispatchers.IO).launch {
-            localSessions.clear()
-            CarStatsViewer.tripDataSource.getActiveDrivingSessionsIds().forEach { sessionId ->
-                CarStatsViewer.tripDataSource.getFullDrivingSession(sessionId).let { session ->
-                    localSessions.add(session)
+            _localSessionsState.update { localSessions ->
+                localSessions.clear()
+                CarStatsViewer.tripDataSource.getActiveDrivingSessionsIds().forEach { sessionId ->
+                    CarStatsViewer.tripDataSource.getFullDrivingSession(sessionId).let { session ->
+                        localSessions.add(session)
+                    }
                 }
+                localSessions
             }
             changeSelectedTrip()
         }
@@ -512,12 +523,17 @@ class DataProcessor {
             while (!localSessionsAccess) {
                 InAppLogger.w("WAITING for local session access")
             }
-
-            localSessions.forEachIndexed { index, session ->
-                val drivingPoints = session.drivingPoints?.toMutableList()
-                drivingPoints?.add(drivingPoint)
-                localSessions[index] = session.copy(last_edited_epoch_time = System.currentTimeMillis())
-                localSessions[index].drivingPoints = drivingPoints
+            _localSessionsState.update { localSessions ->
+                localSessions.forEachIndexed { index, session ->
+                    val drivingPoints = session.drivingPoints?.toMutableList()
+                    drivingPoints?.add(drivingPoint)
+                    localSessions[index] = session.copy(last_edited_epoch_time = System.currentTimeMillis())
+                    localSessions[index].drivingPoints = drivingPoints
+                    if (session.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
+                        _selectedSessionDataFlow.value = localSessions[index]
+                    }
+                }
+                localSessions
             }
 
             changeSelectedTrip()
@@ -560,16 +576,22 @@ class DataProcessor {
      * Update driving trip data flow for UI.
      */
     private fun newDrivingDeltas(distanceDelta: Double, energyDelta: Double, driveTimeDelta: Long, tripTimeDelta: Long) {
-        localSessions.forEachIndexed { index, localSession ->
-            val drivingPoints = localSession.drivingPoints
-            localSessions[index] = localSession.copy(
-                drive_time = localSession.drive_time + TimeUnit.NANOSECONDS.toMillis(driveTimeDelta),
-                trip_time = localSession.trip_time + TimeUnit.NANOSECONDS.toMillis(tripTimeDelta),
-                driven_distance = localSession.driven_distance + distanceDelta,
-                used_energy = localSession.used_energy + energyDelta,
-                last_edited_epoch_time = System.currentTimeMillis()
-            )
-            localSessions[index].drivingPoints = drivingPoints
+        _localSessionsState.update { localSessions ->
+            localSessions.forEachIndexed {index, localSession ->
+                val drivingPoints = localSession.drivingPoints
+                localSessions[index] = localSession.copy(
+                    drive_time = localSession.drive_time + TimeUnit.NANOSECONDS.toMillis(driveTimeDelta),
+                    trip_time = localSession.trip_time + TimeUnit.NANOSECONDS.toMillis(tripTimeDelta),
+                    driven_distance = localSession.driven_distance + distanceDelta,
+                    used_energy = localSession.used_energy + energyDelta,
+                    last_edited_epoch_time = System.currentTimeMillis()
+                )
+                localSessions[index].drivingPoints = drivingPoints
+                if (localSession.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
+                    _selectedSessionDataFlow.value = localSessions[index]
+                }
+            }
+            localSessions
         }
 
         changeSelectedTrip()
@@ -580,7 +602,7 @@ class DataProcessor {
             while (!localSessionsAccess) {
                 InAppLogger.w("WAITING for local session access")
             }
-            localSessions.forEach { localSession ->
+            localSessionsState.value.forEach {localSession ->
                 CarStatsViewer.tripDataSource.updateDrivingSession(localSession)
             }
         } catch (e: Exception) {
@@ -692,8 +714,8 @@ class DataProcessor {
 
     /** Change the selected trip type to update the trip data flow with */
     fun changeSelectedTrip(tripType: Int? = null) {
-        if (localSessions.isNotEmpty()) {
-            (localSessions.lastOrNull { it.session_type == (tripType ?: (CarStatsViewer.appPreferences.mainViewTrip + 1)) } ?: localSessions.firstOrNull())?.let {
+        if (localSessionsState.value.isNotEmpty()) {
+            (localSessionsState.value.lastOrNull { it.session_type == (tripType ?: (CarStatsViewer.appPreferences.mainViewTrip + 1)) } ?: localSessionsState.value.firstOrNull())?.let {
                 _selectedSessionDataFlow.value = it
             }
         }

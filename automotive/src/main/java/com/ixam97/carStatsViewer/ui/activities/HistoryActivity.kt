@@ -29,6 +29,9 @@ import com.ixam97.carStatsViewer.utils.setContentViewAndTheme
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.math.ceil
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class HistoryActivity  : FragmentActivity() {
 
@@ -385,44 +388,4 @@ class HistoryActivity  : FragmentActivity() {
         }
         uploadDialog.show()
     }
-
-//    private fun uploadDatabase() {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            val waitSnack = SnackbarWidget.Builder(this@HistoryActivity, "Upload in progress...")
-//                .build()
-//            runOnUiThread {
-//                this@HistoryActivity.window.findViewById<FrameLayout>(android.R.id.content).addView(waitSnack)
-//            }
-//            val drivingPoints = CarStatsViewer.tripDataSource.getAllDrivingPoints()
-//            InAppLogger.i("[HIST] Done loading ${drivingPoints.size} driving points")
-//            val chargingSessions = CarStatsViewer.tripDataSource.getAllChargingSessions()
-//            InAppLogger.i("[HIST] Done loading ${chargingSessions.size} charging sessions")
-//
-//            val result = (CarStatsViewer.liveDataApis[1] as HttpLiveData).coroutineSendNow(
-//                CarStatsViewer.dataProcessor.realTimeData,
-//                drivingPoints,
-//                chargingSessions
-//            )
-//
-//            runOnUiThread {
-//                this@HistoryActivity.window.findViewById<FrameLayout>(android.R.id.content).removeView(waitSnack)
-//                when (result) {
-//                    LiveDataApi.ConnectionStatus.CONNECTED, LiveDataApi.ConnectionStatus.LIMITED -> {
-//                        SnackbarWidget.Builder(this@HistoryActivity, "Database uploaded successfully.")
-//                            .setIsError(false)
-//                            .setDuration(3000)
-//                            .setStartDrawable(R.drawable.ic_upload)
-//                            .show()
-//                    }
-//                    else ->{
-//                        SnackbarWidget.Builder(this@HistoryActivity, "Database upload failed.")
-//                            .setIsError(true)
-//                            .setDuration(3000)
-//                            .show()
-//                    }
-//                }
-//            }
-//
-//        }
-//    }
 }
