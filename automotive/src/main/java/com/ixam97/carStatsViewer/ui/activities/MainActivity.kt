@@ -503,7 +503,7 @@ class MainActivity : FragmentActivity() {
     fun setSecondaryConsumptionPlotDimension(secondaryConsumptionDimension: Int) {
 
         val constraintSet = ConstraintSet()
-        constraintSet.clone(main_side_bar)
+        constraintSet.clone(main_secondary_selector_container)
 
         when (secondaryConsumptionDimension) {
             1 -> {
@@ -531,8 +531,8 @@ class MainActivity : FragmentActivity() {
                 main_secondary_dimension_indicator.visibility = View.GONE
             }
         }
-        constraintSet.applyTo(main_side_bar)
-        main_consumption_plot.dimensionYSecondary = PlotDimensionY.IndexMap[secondaryConsumptionDimension] ?: PlotDimensionY.CONSUMPTION
+        constraintSet.applyTo(main_secondary_selector_container)
+        main_consumption_plot.dimensionYSecondary = PlotDimensionY.IndexMap[secondaryConsumptionDimension]
         main_consumption_plot.invalidate()
     }
 

@@ -14,6 +14,7 @@ import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.DrivingState
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
+import com.ixam97.carStatsViewer.ui.views.FixedSwitchWidget
 import org.json.JSONObject
 import java.io.DataOutputStream
 import java.net.HttpURLConnection
@@ -130,17 +131,17 @@ class AbrpLiveData (
         val tokenDialog = AlertDialog.Builder(context).apply {
             val layout = LayoutInflater.from(context).inflate(R.layout.dialog_abrp_token, null)
             val abrp_token = layout.findViewById<EditText>(R.id.abrp_token)
-            val abrp_use_api = layout.findViewById<Switch>(R.id.abrp_use_api)
-            val abrp_use_location = layout.findViewById<Switch>(R.id.abrp_use_location)
+            val abrp_use_api = layout.findViewById<FixedSwitchWidget>(R.id.abrp_use_api)
+            val abrp_use_location = layout.findViewById<FixedSwitchWidget>(R.id.abrp_use_location)
 
             abrp_use_api.isChecked = AppPreferences(context).abrpUseApi
             abrp_use_location.isChecked = AppPreferences(context).abrpUseLocation
 
-            abrp_use_api.setOnClickListener {
+            abrp_use_api.setSwitchClickListener() {
                 AppPreferences(context).abrpUseApi = abrp_use_api.isChecked
             }
 
-            abrp_use_location.setOnClickListener {
+            abrp_use_location.setSwitchClickListener() {
                 AppPreferences(context).abrpUseLocation = abrp_use_location.isChecked
             }
 
