@@ -13,6 +13,7 @@ import com.ixam97.carStatsViewer.appPreferences.AppPreferences
 import com.ixam97.carStatsViewer.dataProcessor.DeltaData
 import com.ixam97.carStatsViewer.dataProcessor.DrivingState
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
+import com.ixam97.carStatsViewer.liveDataApi.ConnectionStatus
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import com.ixam97.carStatsViewer.ui.views.FixedSwitchWidget
 import org.json.JSONObject
@@ -128,6 +129,7 @@ class AbrpLiveData (
     }
 
     override fun showSettingsDialog(context: Context) {
+        super.showSettingsDialog(context)
         val tokenDialog = AlertDialog.Builder(context).apply {
             val layout = LayoutInflater.from(context).inflate(R.layout.dialog_abrp_token, null)
             val abrp_token = layout.findViewById<EditText>(R.id.abrp_token)
