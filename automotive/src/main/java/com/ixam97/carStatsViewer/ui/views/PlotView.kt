@@ -292,7 +292,7 @@ class PlotView @JvmOverloads constructor(
         invalidate()
     }
 
-    private fun x(index: Any?, min: Any, max: Any, maxX: Float): Float? {
+    private fun x(index: Number?, min: Number, max: Number, maxX: Float): Float? {
         if (min is Float) {
             return x(index as Float?, min, max as Float, maxX)
         }
@@ -645,7 +645,7 @@ class PlotView @JvmOverloads constructor(
         }
     }
 
-    private fun toPlotPointCollection(configuration: PlotLineConfiguration, line: PlotLine, dimensionY: PlotDimensionY?, minValue: Float, maxValue: Float, minDimension: Any, maxDimension: Any, maxX: Float, maxY: Float, smoothing: Float?, smoothingPercentage: Float?): ArrayList<ArrayList<PlotPointMinAvgMax>> {
+    private fun toPlotPointCollection(configuration: PlotLineConfiguration, line: PlotLine, dimensionY: PlotDimensionY?, minValue: Float, maxValue: Float, minDimension: Number, maxDimension: Number, maxX: Float, maxY: Float, smoothing: Float?, smoothingPercentage: Float?): ArrayList<ArrayList<PlotPointMinAvgMax>> {
         val dataPoints = line.getDataPoints(dimension, dimensionRestriction, dimensionShift, true)
         val plotLineItemPointCollection = line.toPlotLineItemPointCollection(dataPoints, dimension, dimensionY, smoothing, minDimension, maxDimension)
 
@@ -811,7 +811,7 @@ class PlotView @JvmOverloads constructor(
         canvas.drawCircle(point.x, point.y, 3f, paint)
     }
 
-    private fun drawMarker(canvas: Canvas, minDimension: Any, maxDimension: Any, maxX: Float, maxY: Float) {
+    private fun drawMarker(canvas: Canvas, minDimension: Number, maxDimension: Number, maxX: Float, maxY: Float) {
 
         val markers = plotMarkers?.markers?.filter {
             val isNotOnEdge = when (dimension) {

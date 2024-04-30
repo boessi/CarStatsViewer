@@ -16,7 +16,7 @@ data class PlotLineItem (
     var Altitude: Float?,
     var Marker: PlotLineMarkerType?
 ){
-    fun group(index: Int, dimension: PlotDimensionX, dimensionSmoothing: Float?): Any {
+    fun group(index: Int, dimension: PlotDimensionX, dimensionSmoothing: Float?): Number {
         val value = when(dimension) {
             PlotDimensionX.INDEX -> index
             PlotDimensionX.DISTANCE -> Distance
@@ -29,8 +29,8 @@ data class PlotLineItem (
             0f -> value
             else -> when(dimension) {
                 PlotDimensionX.INDEX -> (value as Int / dimensionSmoothing).roundToInt()
-                PlotDimensionX.DISTANCE, PlotDimensionX.STATE_OF_CHARGE -> (value as Float / dimensionSmoothing).roundToInt()
-                PlotDimensionX.TIME -> value as Long / dimensionSmoothing.toLong()
+                PlotDimensionX.DISTANCE, PlotDimensionX.STATE_OF_CHARGE -> (value.toFloat() / dimensionSmoothing).roundToInt()
+                PlotDimensionX.TIME -> value.toLong() / dimensionSmoothing.toLong()
             }
         }
     }
