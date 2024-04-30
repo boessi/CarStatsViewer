@@ -38,7 +38,7 @@ class PlotPaint(
 
             val plotPaint = Paint(basePaint)
             plotPaint.color = color
-            plotPaint.strokeWidth = 3f
+            plotPaint.strokeWidth = 4f
 
             val plotGapPaint = Paint(plotPaint)
             plotGapPaint.color = Color.argb(128, Color.red(color), Color.green(color), Color.blue(color))
