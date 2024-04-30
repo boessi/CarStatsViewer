@@ -55,28 +55,6 @@
                 android:textSize="@dimen/std_font_size"
                 app:text="@string/settings_use_location"/>
 
-            <com.ixam97.carStatsViewer.ui.views.FixedSwitchWidget
-                android:id="@+id/http_live_data_abrp"
-                android:layout_marginTop="15dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="@dimen/std_font_size"
-                app:text="Debug ABRP" />
-
-            <TextView
-                style="@style/menu_row_top_text"
-                android:layout_marginTop="15dp"
-                android:text="Telemetry type:"/>
-
-            <com.ixam97.carStatsViewer.ui.views.MultiButtonWidget
-                android:id="@+id/http_live_data_type"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="10dp"
-                app:textButton1="Real time"
-                app:textButton2="Drive points"
-                app:textButton3="Both"
-                app:numButtons="3"/>
         </LinearLayout>
     <!--
     <Button

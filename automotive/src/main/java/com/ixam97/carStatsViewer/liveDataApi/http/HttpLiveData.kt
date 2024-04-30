@@ -79,9 +79,6 @@ class HttpLiveData (
         val password = layout.findViewById<EditText>(R.id.http_live_data_password)
         val httpLiveDataEnabled = layout.findViewById<FixedSwitchWidget>(R.id.http_live_data_enabled)
         val httpLiveDataLocation = layout.findViewById<FixedSwitchWidget>(R.id.http_live_data_location)
-        val abrpDebug = layout.findViewById<FixedSwitchWidget>(R.id.http_live_data_abrp)
-        val apiTypeMultiButton = layout.findViewById<MultiButtonWidget>(R.id.http_live_data_type)
-        // val confirmButton = layout.findViewById<Button>(R.id.http_live_data_confirm)
 
         val httpLiveDataSettingsDialog = AlertDialog.Builder(context).apply {
             setTitle(R.string.settings_apis_title)
@@ -93,17 +90,6 @@ class HttpLiveData (
                 dialog.cancel()
             }
             setView(layout)
-
-            /*
-            setPositiveButton("OK") { _, _ ->
-                AppPreferences(context).httpLiveDataURL = url.text.toString()
-                AppPreferences(context).httpLiveDataUsername = username.text.toString()
-                AppPreferences(context).httpLiveDataPassword = password.text.toString()
-            }
-
-            setTitle(context.getString(R.string.settings_apis_http))
-            setMessage(context.getString(R.string.http_description))
-            */
             setCancelable(true)
             create()
         }
@@ -112,31 +98,12 @@ class HttpLiveData (
 
         httpLiveDataEnabled.isChecked = AppPreferences(context).httpLiveDataEnabled
         httpLiveDataLocation.isChecked = AppPreferences(context).httpLiveDataLocation
-        abrpDebug.isChecked = AppPreferences(context).httpLiveDataSendABRPDataset
-        apiTypeMultiButton.selectedIndex = AppPreferences(context).httpApiTelemetryType
-
-        /*
-        confirmButton.isSelected = true
-
-        confirmButton.setOnClickListener {
-            AppPreferences(context).httpLiveDataURL = url.text.toString()
-            AppPreferences(context).httpLiveDataUsername = username.text.toString()
-            AppPreferences(context).httpLiveDataPassword = password.text.toString()
-            dialog.cancel()
-        }
-         */
 
         httpLiveDataEnabled.setSwitchClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked
         }
         httpLiveDataLocation.setSwitchClickListener {
             AppPreferences(context).httpLiveDataLocation = httpLiveDataLocation.isChecked
-        }
-        abrpDebug.setSwitchClickListener {
-            AppPreferences(context).httpLiveDataSendABRPDataset = abrpDebug.isChecked
-        }
-        apiTypeMultiButton.setOnIndexChangedListener {
-            AppPreferences(context).httpApiTelemetryType = apiTypeMultiButton.selectedIndex
         }
 
         url.setText(AppPreferences(context).httpLiveDataURL)
