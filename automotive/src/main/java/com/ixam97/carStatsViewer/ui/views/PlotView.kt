@@ -37,13 +37,13 @@ import com.ixam97.carStatsViewer.ui.plot.enums.PlotSessionGapRendering
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotLinePaint
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotMarkerPaint
 import com.ixam97.carStatsViewer.ui.plot.graphics.PlotPaint
-import com.ixam97.carStatsViewer.ui.plot.objects.*
-import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotGlobalConfiguration
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotLine
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotLineConfiguration
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotLineItem
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotMarkers
+import com.ixam97.carStatsViewer.ui.plot.objects.PlotPointMinAvgMax
+import com.ixam97.carStatsViewer.utils.InAppLogger
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt

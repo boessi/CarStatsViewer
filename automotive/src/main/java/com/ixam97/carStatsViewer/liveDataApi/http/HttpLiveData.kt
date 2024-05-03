@@ -10,17 +10,13 @@ import com.ixam97.carStatsViewer.BuildConfig
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.appPreferences.AppPreferences
-import com.ixam97.carStatsViewer.dataProcessor.IgnitionState
 import com.ixam97.carStatsViewer.dataProcessor.DeltaData
+import com.ixam97.carStatsViewer.dataProcessor.IgnitionState
 import com.ixam97.carStatsViewer.dataProcessor.RealTimeData
-import com.ixam97.carStatsViewer.database.tripData.ChargingSession
-import com.ixam97.carStatsViewer.database.tripData.DrivingPoint
-import com.ixam97.carStatsViewer.liveDataApi.ConnectionStatus
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
+import com.ixam97.carStatsViewer.liveDataApi.ConnectionStatus
 import com.ixam97.carStatsViewer.liveDataApi.LiveDataApi
-import com.ixam97.carStatsViewer.liveDataApi.abrpLiveData.AbrpLiveData
 import com.ixam97.carStatsViewer.ui.views.FixedSwitchWidget
-import com.ixam97.carStatsViewer.ui.views.MultiButtonWidget
 import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.utils.StringFormatters
 import java.io.DataOutputStream
@@ -28,7 +24,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.Base64
-import java.util.*
 
 
 class HttpLiveData (
