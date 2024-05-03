@@ -21,8 +21,6 @@ import com.ixam97.carStatsViewer.appPreferences.AppPreferences
 import com.ixam97.carStatsViewer.database.log.LogEntry
 import com.ixam97.carStatsViewer.database.tripData.TripType
 import com.ixam97.carStatsViewer.mailSender.MailSender
-import com.ixam97.carStatsViewer.adapters.LogAdapter
-import com.ixam97.carStatsViewer.database.tripData.LocalTripDataSource
 import com.ixam97.carStatsViewer.ui.views.MultiSelectWidget
 import com.ixam97.carStatsViewer.ui.views.SnackbarWidget
 import com.ixam97.carStatsViewer.utils.DistanceUnitEnum

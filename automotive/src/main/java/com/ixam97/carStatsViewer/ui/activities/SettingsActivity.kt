@@ -10,11 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.ixam97.carStatsViewer.BuildConfig
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.R
-import com.ixam97.carStatsViewer.*
-import com.ixam97.carStatsViewer.appPreferences.AppPreference
-import com.ixam97.carStatsViewer.utils.InAppLogger
 import com.ixam97.carStatsViewer.ui.plot.objects.PlotGlobalConfiguration
-import com.ixam97.carStatsViewer.utils.applyTypeface
 import com.ixam97.carStatsViewer.utils.setContentViewAndTheme
 import kotlinx.android.synthetic.main.activity_settings.settings_about_widget
 import kotlinx.android.synthetic.main.activity_settings.settings_apis_widget
