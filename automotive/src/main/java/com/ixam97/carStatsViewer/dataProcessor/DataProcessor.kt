@@ -93,6 +93,7 @@ class DataProcessor {
         private set(value) {
             field = value
             _realTimeDataFlow.value = value
+            // aaosExec?.execute(aaosRunnable)
         }
 
     // private var chargingTripData = ChargingTripData()
@@ -101,6 +102,12 @@ class DataProcessor {
     //         _chargingTripDataFlow.value = field
     //     }
 
+    var selectedSessionData : DrivingSession? = null
+        private set(value) {
+            field = value
+            _selectedSessionDataFlow.value = value
+            // aaosExec?.execute(aaosRunnable)
+        }
 
     private val _realTimeDataFlow = MutableStateFlow(realTimeData)
     val realTimeDataFlow = _realTimeDataFlow.asStateFlow()

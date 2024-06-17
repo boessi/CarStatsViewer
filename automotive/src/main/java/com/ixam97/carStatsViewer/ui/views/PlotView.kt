@@ -199,6 +199,9 @@ class PlotView @JvmOverloads constructor(
 
     private val appPreferences : AppPreferences
 
+    private var mWidth: Int
+    private var mHeight: Int
+
     init {
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.PlotView)
         try {
@@ -210,6 +213,9 @@ class PlotView @JvmOverloads constructor(
         }
         setupPaint()
         appPreferences = AppPreferences(context)
+
+        mWidth = width
+        mHeight = height
     }
 
     // Setup paint with color and stroke styles
@@ -398,23 +404,23 @@ class PlotView @JvmOverloads constructor(
         }
     }
 
-    private val mScrollGestureListener = object : GestureDetector.SimpleOnGestureListener() {
-        private val shiftingFraction = 50L
-
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            touchDimensionShiftDistance += distanceX * touchDistanceMultiplier
-
-            val targetDimensionShift = (((touchDimensionShift + touchDimensionShiftDistance * touchDimensionShiftByPixel) / ((dimensionRestriction?:shiftingFraction) / shiftingFraction)).toLong() * ((dimensionRestriction?:shiftingFraction) / shiftingFraction))
-                .coerceAtMost(touchDimensionMax - (dimensionRestriction ?: 0L))
-                .coerceAtLeast(0L)
-
-            dimensionShift = (targetDimensionShift / 100L) * 100L
-
-            Log.d("PLOT", "Shift: $dimensionShift")
-
-            return true
-        }
-    }
+//    private val mScrollGestureListener = object : GestureDetector.SimpleOnGestureListener() {
+//        private val shiftingFraction = 50L
+//
+//        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+//            touchDimensionShiftDistance += distanceX * touchDistanceMultiplier
+//
+//            val targetDimensionShift = (((touchDimensionShift + touchDimensionShiftDistance * touchDimensionShiftByPixel) / ((dimensionRestriction?:shiftingFraction) / shiftingFraction)).toLong() * ((dimensionRestriction?:shiftingFraction) / shiftingFraction))
+//                .coerceAtMost(touchDimensionMax - (dimensionRestriction ?: 0L))
+//                .coerceAtLeast(0L)
+//
+//            dimensionShift = (targetDimensionShift / 100L) * 100L
+//
+//            Log.d("PLOT", "Shift: $dimensionShift")
+//
+//            return true
+//        }
+//    }
 
     private val mTapGestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
@@ -433,7 +439,7 @@ class PlotView @JvmOverloads constructor(
         }
     }
 
-    private val mScrollDetector = GestureDetector(context, mScrollGestureListener)
+    //private val mScrollDetector = GestureDetector(context, mScrollGestureListener)
     private val mTapDetector = GestureDetector(context, mTapGestureListener)
     private val mScaleDetector = ScaleGestureDetector(context, mScaleGestureDetector)
 
@@ -457,7 +463,7 @@ class PlotView @JvmOverloads constructor(
                 }
                 touchDimensionShift = dimensionShift ?: 0L
                 touchDimensionShiftDistance = 0f
-                touchDimensionShiftByPixel = restriction.toFloat() / width.toFloat()
+                touchDimensionShiftByPixel = restriction.toFloat() / mWidth.toFloat()
 
                 val dimensionMax = plotLines.mapNotNull { it.first.distanceDimension(dimension) }.maxOfOrNull { it }?.toLong() ?: return true
                 touchDimensionMax = dimensionMax + (max - dimensionMax % max)
@@ -472,7 +478,7 @@ class PlotView @JvmOverloads constructor(
         mTapDetector.onTouchEvent(ev)
 
         if (touchGesture) {
-            mScrollDetector.onTouchEvent(ev)
+            //mScrollDetector.onTouchEvent(ev)
             mScaleDetector.onTouchEvent(ev)
         }
 
@@ -496,24 +502,24 @@ class PlotView @JvmOverloads constructor(
     private var dataPointMap : HashMap<PlotLine, List<PlotLineItem>> = HashMap()
     private fun dataPoints(plotLine: PlotLine?) : List<PlotLineItem>? {
         if (plotLine == null) return null
-        Log.d("PLOT", "dataPointMap.containsKey = ${dataPointMap.containsKey(plotLine)}")
+        // Log.d("PLOT", "dataPointMap.containsKey = ${dataPointMap.containsKey(plotLine)}")
         if (!dataPointMap.containsKey(plotLine)) {
-            Log.i("PLOT", "Getting data points")
+            // Log.i("PLOT", "Getting data points")
             dataPointMap[plotLine] = plotLine.getDataPoints(dimension, dimensionRestriction, dimensionShift)
         }
         return dataPointMap[plotLine]
     }
 
     private fun drawBackground(canvas: Canvas) {
-        val maxX = width.toFloat()
-        val maxY = height.toFloat()
+        val maxX = mWidth.toFloat()
+        val maxY = mHeight.toFloat()
 
         canvas.drawRect(xMargin.toFloat(), yMargin.toFloat(), maxX - xMargin, maxY - yMargin, backgroundPaint)
     }
 
     private fun drawXLines(canvas: Canvas) {
-        val maxX = width.toFloat()
-        val maxY = height.toFloat()
+        val maxX = mWidth.toFloat()
+        val maxY = mHeight.toFloat()
 
         val distanceDimension = when {
             dimensionRestriction != null -> dimensionRestriction!!.toFloat()
@@ -586,8 +592,8 @@ class PlotView @JvmOverloads constructor(
     }
 
     private fun drawYBaseLines(canvas: Canvas) {
-        val maxX = width.toFloat()
-        val maxY = height.toFloat()
+        val maxX = mWidth.toFloat()
+        val maxY = mHeight.toFloat()
 
         for (i in 0 until yLineCount) {
             val cordY = y(i.toFloat(), 0f, yLineCount.toFloat() - 1, maxY)!!
@@ -601,8 +607,8 @@ class PlotView @JvmOverloads constructor(
     }
 
     private fun drawPlot(canvas: Canvas) {
-        val maxX = width.toFloat()
-        val maxY = height.toFloat()
+        val maxX = mWidth.toFloat()
+        val maxY = mHeight.toFloat()
 
         val dimensionYArrayList = arrayListOf(dimensionYPrimary, dimensionYSecondary)
         if (dimensionYAdditional?.isEmpty() == false) dimensionYArrayList.addAll(dimensionYAdditional!!)
@@ -962,8 +968,8 @@ class PlotView @JvmOverloads constructor(
     }
     
     private fun drawYLines(canvas: Canvas) {
-        val maxX = width.toFloat()
-        val maxY = height.toFloat()
+        val maxX = mWidth.toFloat()
+        val maxY = mHeight.toFloat()
 
         val bounds = Rect()
         labelPaint.getTextBounds("Dummy", 0, "Dummy".length, bounds)

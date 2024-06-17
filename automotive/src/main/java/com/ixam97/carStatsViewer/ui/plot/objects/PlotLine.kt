@@ -1,6 +1,5 @@
 package com.ixam97.carStatsViewer.ui.plot.objects
 
-import android.util.Log
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotDimensionX
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotDimensionY
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotHighlightMethod
@@ -104,8 +103,8 @@ class PlotLine(
 
     private fun createLodDataPoints(dataPoints: List<PlotLineItem>, plotDimensionX: PlotDimensionX): List<PlotLineItem> {
         if (dataPoints.isEmpty()) return dataPoints
-        Log.i("PLOT", "Create LoD data points ...")
-        Log.i("PLOT", "Data points size: ${dataPoints.size}")
+        // Log.i("PLOT", "Create LoD data points ...")
+        // Log.i("PLOT", "Data points size: ${dataPoints.size}")
 
         return when (plotDimensionX) {
             PlotDimensionX.DISTANCE -> {
@@ -136,7 +135,7 @@ class PlotLine(
         return when {
             dataPoints.isEmpty() || min == null || max == null -> dataPoints.map { it.value }
             else ->  when (dimension) {
-                PlotDimensionX.INDEX -> dataPoints.filter { it.key in min as Int..max as Int }.map { it.value }
+                PlotDimensionX.INDEX -> dataPoints.filter { it.key in min.toInt()..max.toInt() }.map { it.value }
                 PlotDimensionX.DISTANCE -> {
                     val filteredDataPoints = dataPoints.filter { it.value.Distance in min.toFloat()..max.toFloat() }.map { it.value }
                     createLodDataPoints(filteredDataPoints, PlotDimensionX.DISTANCE)
@@ -153,7 +152,7 @@ class PlotLine(
             else -> when (dimension) {
                 PlotDimensionX.INDEX -> when(dimensionRestriction) {
                     null -> dataPoints.minOf { it.key }
-                    else -> maxDimension(dimension, dimensionRestriction, dimensionShift) as Int - (if (surplus) 2 * dimensionRestriction else dimensionRestriction)
+                    else -> maxDimension(dimension, dimensionRestriction, dimensionShift)!!.toInt() - (if (surplus) 2 * dimensionRestriction else dimensionRestriction)
                 }
                 PlotDimensionX.DISTANCE -> when(dimensionRestriction) {
                     null -> dataPoints.minOf { it.value.Distance }
