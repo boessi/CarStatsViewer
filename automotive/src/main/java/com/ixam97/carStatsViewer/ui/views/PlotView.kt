@@ -404,23 +404,23 @@ class PlotView @JvmOverloads constructor(
         }
     }
 
-//    private val mScrollGestureListener = object : GestureDetector.SimpleOnGestureListener() {
-//        private val shiftingFraction = 50L
-//
-//        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-//            touchDimensionShiftDistance += distanceX * touchDistanceMultiplier
-//
-//            val targetDimensionShift = (((touchDimensionShift + touchDimensionShiftDistance * touchDimensionShiftByPixel) / ((dimensionRestriction?:shiftingFraction) / shiftingFraction)).toLong() * ((dimensionRestriction?:shiftingFraction) / shiftingFraction))
-//                .coerceAtMost(touchDimensionMax - (dimensionRestriction ?: 0L))
-//                .coerceAtLeast(0L)
-//
-//            dimensionShift = (targetDimensionShift / 100L) * 100L
-//
-//            Log.d("PLOT", "Shift: $dimensionShift")
-//
-//            return true
-//        }
-//    }
+    private val mScrollGestureListener = object : GestureDetector.SimpleOnGestureListener() {
+        private val shiftingFraction = 50L
+
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+            touchDimensionShiftDistance += distanceX * touchDistanceMultiplier
+
+            val targetDimensionShift = (((touchDimensionShift + touchDimensionShiftDistance * touchDimensionShiftByPixel) / ((dimensionRestriction?:shiftingFraction) / shiftingFraction)).toLong() * ((dimensionRestriction?:shiftingFraction) / shiftingFraction))
+                .coerceAtMost(touchDimensionMax - (dimensionRestriction ?: 0L))
+                .coerceAtLeast(0L)
+
+            dimensionShift = (targetDimensionShift / 100L) * 100L
+
+            Log.d("PLOT", "Shift: $dimensionShift")
+
+            return true
+        }
+    }
 
     private val mTapGestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
@@ -439,7 +439,7 @@ class PlotView @JvmOverloads constructor(
         }
     }
 
-    //private val mScrollDetector = GestureDetector(context, mScrollGestureListener)
+    private val mScrollDetector = GestureDetector(context, mScrollGestureListener)
     private val mTapDetector = GestureDetector(context, mTapGestureListener)
     private val mScaleDetector = ScaleGestureDetector(context, mScaleGestureDetector)
 
@@ -478,22 +478,33 @@ class PlotView @JvmOverloads constructor(
         mTapDetector.onTouchEvent(ev)
 
         if (touchGesture) {
-            //mScrollDetector.onTouchEvent(ev)
+            mScrollDetector.onTouchEvent(ev)
             mScaleDetector.onTouchEvent(ev)
         }
 
         return true
     }
 
+    fun drawDiagram(canvas: Canvas, boundingRect: Rect? = null) {
+        boundingRect?.let {
+            mWidth = it.right - it.left
+            mHeight = it.bottom - it.top
+        }
+        dataPointMap.clear()
+        drawBackground(canvas)
+        drawXLines(canvas)
+        drawYBaseLines(canvas)
+        drawPlot(canvas)
+        drawYLines(canvas)
+    }
+
     override fun onDraw(canvas: Canvas) {
         val elapsed = measureTimeMillis {
+            Log.d("PLOT", "onDraw, dimensionRestriction: $dimensionRestriction, dimensionShift:$dimensionShift")
+            mWidth = width
+            mHeight = height
             super.onDraw(canvas)
-            dataPointMap.clear()
-            drawBackground(canvas)
-            drawXLines(canvas)
-            drawYBaseLines(canvas)
-            drawPlot(canvas)
-            drawYLines(canvas)
+            drawDiagram(canvas)
         }
 
         InAppLogger.v("[PLOT] render plot in ${elapsed / 1000f}s")
