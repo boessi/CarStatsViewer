@@ -17,6 +17,7 @@ import com.ixam97.carStatsViewer.BuildConfig
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.adapters.TripHistoryAdapter
+import com.ixam97.carStatsViewer.database.tripData.ChargingPoint
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import com.ixam97.carStatsViewer.databinding.ActivityHistoryBinding
 import com.ixam97.carStatsViewer.liveDataApi.ConnectionStatus
