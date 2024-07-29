@@ -123,34 +123,13 @@ class MainActivity : FragmentActivity() {
 
         // setTripTypeIcon(appPreferences.mainViewTrip + 1)
 
-        /*
-        // Temporary
-        if (appPreferences.altLayout) {
-            main_gage_layout.visibility = View.GONE
-            main_alternate_gage_layout.visibility = View.VISIBLE
-        } else {
-            main_gage_layout.visibility = View.VISIBLE
-            main_alternate_gage_layout.visibility = View.GONE
-        }
-
-        // Temporary
-        main_speed_gage.minValue = 0f
-        main_speed_gage.maxValue = appPreferences.distanceUnit.toUnit(205f)
-        main_speed_gage.gageUnit = "${appPreferences.distanceUnit.unit()}/h"
-        main_speed_gage.gageName = "Speed"
-        main_soc_gage.minValue = 0f
-        main_soc_gage.maxValue = 100f
-        main_soc_gage.gageName = "State of charge"
-        main_soc_gage.gageUnit = "%"
-        */
-
         setGageAndPlotUnits(appPreferences.consumptionUnit, appPreferences.distanceUnit)
 
         setGageLimits()
 
         setSecondaryConsumptionPlotDimension(appPreferences.secondaryConsumptionDimension)
 
-        setGageVisibilities(appPreferences.consumptionPlotVisibleGages, appPreferences.consumptionPlotVisibleGages)
+        setGageVisibilities(appPreferences.consumptionPlotVisibleGages, appPreferences.consumptionPlotVisibleGages, appPreferences.altLayout)
 
         binding.mainSecondaryDimensionIndicator.background = if (appPreferences.consumptionPlotSecondaryColor) {
             getColorFromAttribute(this, R.attr.tertiary_plot_color).toDrawable()
@@ -214,7 +193,7 @@ class MainActivity : FragmentActivity() {
                             mainSoCGage.setValue((it.stateOfCharge!! * 100f).roundToInt())
 
                             mainSpeedGage.setValue(
-                                appPreferences.distanceUnit.toUnit(it.speed!! * 3.6).toInt()
+                                appPreferences.distanceUnit.toUnit(it.speed!! * 3.6f)
                             )
                             CarStatsViewer.dataProcessor.staticVehicleData.batteryCapacity?.let { batteryCapacity ->
                                 mainSocGage.setValue((it.batteryLevel!! / (batteryCapacity) * 100).roundToInt())
@@ -406,7 +385,7 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        appPreferences.altLayout = false
+        //appPreferences.altLayout = false
 
         startForegroundService(Intent(applicationContext, DataCollector::class.java))
 
@@ -555,6 +534,16 @@ class MainActivity : FragmentActivity() {
             }
             else -> 155f
         }
+
+        mainSpeedGage.minValue = 0f
+        mainSpeedGage.maxValue = appPreferences.distanceUnit.toUnit(205f)
+        mainSpeedGage.gageUnit = "${appPreferences.distanceUnit.unit()}/h"
+        mainSpeedGage.gageName = "Speed"
+
+        mainSoCGage.minValue = 0f
+        mainSoCGage.maxValue = 100f
+        mainSoCGage.gageName = "xx"
+        mainSoCGage.gageUnit = "yy"
     }
 
     fun setPrimaryConsumptionPlotDimension(index: Int) = with(binding) {
@@ -603,7 +592,15 @@ class MainActivity : FragmentActivity() {
         mainConsumptionPlot.invalidate()
     }
 
-    private fun setGageVisibilities(consumptionPlotVisibleGages: Boolean, chargePlotVisibleGages: Boolean) = with(binding) {
+    private fun setGageVisibilities(consumptionPlotVisibleGages: Boolean, chargePlotVisibleGages: Boolean, altLayout: Boolean) = with(binding) {
+        if (altLayout) {
+            mainGageLayout.visibility = View.GONE
+            mainAlternateGageLayout.visibility = View.VISIBLE
+        } else {
+            mainGageLayout.visibility = View.VISIBLE
+            mainAlternateGageLayout.visibility = View.GONE
+        }
+
         mainPowerGage.barVisibility = consumptionPlotVisibleGages
         mainConsumptionGage.barVisibility = consumptionPlotVisibleGages
         mainSoCGage.barVisibility = chargePlotVisibleGages
@@ -746,13 +743,6 @@ class MainActivity : FragmentActivity() {
         mainChargeGage.minValue = 0f
         mainChargeGage.maxValue = 160f
         mainChargeGage.setValue(0f)
-
-        mainSoCGage.gageName = getString(R.string.main_gage_SoC)
-        mainSoCGage.gageUnit = "%"
-        mainSoCGage.primaryColor = getColor(R.color.charge_plot_color)
-        mainSoCGage.minValue = 0f
-        mainSoCGage.maxValue = 100f
-        mainSoCGage.setValue(0f)
     }
 
     private fun setUiEventListeners() = with(binding) {

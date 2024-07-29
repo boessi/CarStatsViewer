@@ -97,6 +97,8 @@ class HttpLiveData (
 
         httpLiveDataEnabled.setSwitchClickListener {
             AppPreferences(context).httpLiveDataEnabled = httpLiveDataEnabled.isChecked
+            if (!httpLiveDataEnabled.isChecked) connectionStatus = ConnectionStatus.UNUSED
+            updateWatchdog()
         }
         httpLiveDataLocation.setSwitchClickListener {
             AppPreferences(context).httpLiveDataLocation = httpLiveDataLocation.isChecked

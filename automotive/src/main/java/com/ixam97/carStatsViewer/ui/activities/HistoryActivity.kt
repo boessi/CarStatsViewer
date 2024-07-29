@@ -3,25 +3,22 @@ package com.ixam97.carStatsViewer.ui.activities
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.CheckBox
 import android.widget.DatePicker
-import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ixam97.carStatsViewer.BuildConfig
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.adapters.TripHistoryAdapter
-import com.ixam97.carStatsViewer.database.tripData.ChargingPoint
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
 import com.ixam97.carStatsViewer.databinding.ActivityHistoryBinding
 import com.ixam97.carStatsViewer.liveDataApi.ConnectionStatus
-import com.ixam97.carStatsViewer.liveDataApi.http.HttpLiveData
 import com.ixam97.carStatsViewer.ui.fragments.SummaryFragment
 import com.ixam97.carStatsViewer.ui.views.SnackbarWidget
 import com.ixam97.carStatsViewer.ui.views.TripHistoryRowWidget
@@ -32,9 +29,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
-import kotlin.math.ceil
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 class HistoryActivity  : FragmentActivity() {
 
@@ -116,6 +110,14 @@ class HistoryActivity  : FragmentActivity() {
 
             historyMultiDelete.setOnClickListener {
                 createMultiDeleteDialog()
+            }
+
+            if (CarStatsViewer.liveDataApis[1].connectionStatus == ConnectionStatus.UNUSED) {
+                historyButtonUpload.isEnabled = false
+                historyButtonUpload.setColorFilter(
+                    getColor(R.color.disabled_tint),
+                    PorterDuff.Mode.SRC_IN
+                )
             }
 
             historyButtonUpload.setOnClickListener {
@@ -380,15 +382,9 @@ class HistoryActivity  : FragmentActivity() {
     }
 
     private fun openUploadDialog() {
-        var uploadDialog = AlertDialog.Builder(this@HistoryActivity).apply {
+        val uploadDialog = AlertDialog.Builder(this@HistoryActivity).apply {
             setTitle(R.string.history_dialog_upload_title)
-            // setMessage("You are about to upload the entire local database to the API endpoint"+
-            //         " specified in the HTTP webhook settings!\n\nMake sure you have reset the"+
-            //         " data on the server before this to prevent data duplication. If supported by" +
-            //         " the API endpoint this will happen automatically \n\n" +
-            //         " This action may take a long time to finish depending on the database size." +
-            //         " Please remain on this page until a notification is shown!")
-            setMessage(R.string.history_dialog_upload_message)
+            setMessage(R.string.history_dialog_upload_message_2)
             setNegativeButton(R.string.dialog_reset_cancel) { _,_ ->
 
             }

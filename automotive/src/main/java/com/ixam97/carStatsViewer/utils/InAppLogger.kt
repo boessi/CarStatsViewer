@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 
 val AppPreferences.LogLevel: AppPreference<Int>
-    get() = AppPreference<Int>("preference_log_level", Log.VERBOSE, sharedPref)
+    get() = AppPreference<Int>("preference_log_level", Log.INFO, sharedPref)
 val AppPreferences.LogLength: AppPreference<Int>
     get() = AppPreference<Int>("preference_log_length", 4, sharedPref)
 
@@ -22,6 +22,9 @@ var AppPreferences.logLevel: Int get() = LogLevel.value; set(value) {LogLevel.va
 var AppPreferences.logLength: Int get() = LogLength.value; set(value) {LogLength.value = value}
 
 object InAppLogger {
+
+    // number of days to keep logs, delete after
+    private const val deleteDays: Int = 28
 
     private val _realTimeLog = MutableStateFlow<LogEntry?>(null)
     val realTimeLog = _realTimeLog.asStateFlow()
@@ -53,6 +56,9 @@ object InAppLogger {
         val messageTime = SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS").format(logTime)
         Log.println(type,"InAppLogger:", "$messageTime ${typeSymbol(type)}: $message")
 
+        // respect the log level setting when writing to database to reduce stress.
+        if (type < CarStatsViewer.appPreferences.logLevel + 2) return
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val newLogEntry = LogEntry(
@@ -61,6 +67,11 @@ object InAppLogger {
                     message = message
                 )
                 logDao.insert(newLogEntry)
+
+                // Delete old log entries older than 'deleteDays'
+                val trimTime = System.currentTimeMillis() - (86_400_000L * deleteDays)
+                logDao.trim(trimTime)
+
                 _realTimeLog.value = newLogEntry// "${SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS").format(newLogEntry.epochTime)} ${typeSymbol(newLogEntry.type)}: ${newLogEntry.message}"
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
