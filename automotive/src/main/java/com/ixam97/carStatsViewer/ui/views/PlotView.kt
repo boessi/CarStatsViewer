@@ -500,7 +500,7 @@ class PlotView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         val elapsed = measureTimeMillis {
-            Log.d("PLOT", "onDraw, dimensionRestriction: $dimensionRestriction, dimensionShift:$dimensionShift")
+            //Log.d("PLOT", "onDraw, dimensionRestriction: $dimensionRestriction, dimensionShift:$dimensionShift")
             mWidth = width
             mHeight = height
             super.onDraw(canvas)
