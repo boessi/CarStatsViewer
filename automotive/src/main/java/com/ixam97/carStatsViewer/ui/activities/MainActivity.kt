@@ -468,7 +468,7 @@ class MainActivity : FragmentActivity() {
         } else View.GONE
     }
 
-    private fun setGageAndPlotUnits(consumptionUnit: Boolean, distanceUnit: DistanceUnitEnum) = with(binding) {
+    private fun  setGageAndPlotUnits(consumptionUnit: Boolean, distanceUnit: DistanceUnitEnum) = with(binding) {
         if (consumptionUnit) {
             mainConsumptionGage.gageUnit = "Wh/%s".format(distanceUnit.unit())
             mainConsumptionGage.minValue = distanceUnit.asUnit(-300f)
@@ -734,7 +734,7 @@ class MainActivity : FragmentActivity() {
 
         mainSpeedGage.gageName = getString(R.string.main_gage_speed)
         mainSpeedGage.gageUnit = "${appPreferences.distanceUnit.unit()}/h"
-        mainSocGage.primaryColor = getColor(R.color.polestar_orange)
+        mainSpeedGage.primaryColor = getColor(R.color.polestar_orange)
         mainSpeedGage.minValue = 0f
         mainSpeedGage.maxValue = appPreferences.distanceUnit.toUnit(205f)
         mainSpeedGage.setValue(0f)
