@@ -595,7 +595,9 @@ class MainActivity : FragmentActivity() {
 
         mainPowerGage.barVisibility = consumptionPlotVisibleGages
         mainConsumptionGage.barVisibility = consumptionPlotVisibleGages
-        mainSocGage.barVisibility = chargePlotVisibleGages
+        mainSpeedGage.barVisibility = consumptionPlotVisibleGages
+        mainSocGage.barVisibility = consumptionPlotVisibleGages
+
         mainChargeSocGage.barVisibility = chargePlotVisibleGages
         mainChargeGage.barVisibility = chargePlotVisibleGages
     }
