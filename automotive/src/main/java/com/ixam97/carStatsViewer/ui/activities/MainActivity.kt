@@ -79,7 +79,7 @@ class MainActivity : FragmentActivity() {
 
     private val chargePlotLine = PlotLine(
         PlotLineConfiguration(
-            PlotRange(0f, 5f, 0f, 240f, 5f),
+            PlotRange(0f, 5f, 0f, 400f, 5f),
             PlotLineLabelFormat.FLOAT,
             PlotHighlightMethod.AVG_BY_TIME,
             "kW"

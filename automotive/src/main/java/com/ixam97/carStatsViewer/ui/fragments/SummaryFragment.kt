@@ -51,6 +51,9 @@ import kotlinx.coroutines.withContext
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
+// import com.mapbox.geojson.Point
+// import com.mapbox.maps.CameraOptions
+
 
 class SummaryFragment() : Fragment(R.layout.fragment_summary) {
 
@@ -70,7 +73,7 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
 
     private var chargePlotLine = PlotLine(
         PlotLineConfiguration(
-            PlotRange(0f, 5f, 0f, 160f, 5f),
+            PlotRange(0f, 5f, 0f, 400f, 5f),
             PlotLineLabelFormat.FLOAT,
             PlotHighlightMethod.AVG_BY_TIME,
             "kW"
@@ -152,6 +155,24 @@ class SummaryFragment() : Fragment(R.layout.fragment_summary) {
                 }
             }
         }
+
+        // Experimental Mapbox test
+        /*
+        mapView.mapboxMap.apply {
+            loadStyle("mapbox://styles/ixam97/clfekq5z500hu01mx8s0g54gu")
+            setCamera(
+                CameraOptions.Builder()
+                    .center(Point.fromLngLat(11.957314, 57.710032))
+                    .zoom(12.0)
+                    .build()
+            )
+        }
+
+        mapView.setOnTouchListener { v, event ->
+            disallowIntercept(v, event)
+            false
+        }
+        */
 
         summaryConsumptionPlot.setOnTouchListener { v, event ->
             disallowIntercept(v, event)
