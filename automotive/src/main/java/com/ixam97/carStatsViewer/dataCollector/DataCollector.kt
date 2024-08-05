@@ -186,7 +186,7 @@ class DataCollector: Service() {
         }
 
         if (CarStatsViewer.appPreferences.autostart)
-            CarStatsViewer.setupRestartAlarm(CarStatsViewer.appContext, "termination", 10_000, extendedLogging = true)
+            CarStatsViewer.setupRestartAlarm(CarStatsViewer.appContext, "termination", 9_500, extendedLogging = true)
 
         var invalidLocationCount = 0
 
