@@ -105,12 +105,8 @@ class DebugActivity : FragmentActivity() {
                 overridePendingTransition(R.anim.stay_still, R.anim.slide_out_down)
             }
 
-            if(BuildConfig.FLAVOR_version == "dev") {
-                debugCompose.setOnRowClickListener {
-                    startActivity(Intent(this@DebugActivity, ComposeSettingsActivity::class.java))
-                }
-            } else {
-                debugCompose.visibility = View.GONE
+            debugCompose.setOnRowClickListener {
+                startActivity(Intent(this@DebugActivity, ComposeSettingsActivity::class.java))
             }
 
             logButtonSend.setOnClickListener {
