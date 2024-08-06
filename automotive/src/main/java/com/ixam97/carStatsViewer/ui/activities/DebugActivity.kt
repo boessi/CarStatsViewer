@@ -109,12 +109,8 @@ class DebugActivity : FragmentActivity() {
                 startActivity(Intent(this@DebugActivity, ComposeSettingsActivity::class.java))
             }
 
-            if(BuildConfig.FLAVOR_version == "dev") {
-                debugCompose.setOnRowClickListener {
-                    startActivity(Intent(this@DebugActivity, ComposeSettingsActivity::class.java))
-                }
-            } else {
-                debugCompose.visibility = View.GONE
+            debugCompose.setOnRowClickListener {
+                startActivity(Intent(this@DebugActivity, ComposeSettingsActivity::class.java))
             }
 
             logButtonSend.setOnClickListener {
