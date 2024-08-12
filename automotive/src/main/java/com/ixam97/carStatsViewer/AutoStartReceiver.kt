@@ -154,7 +154,7 @@ class AutoStartReceiver: BroadcastReceiver() {
                 Notification.Action.Builder(
                     null,
                     context.getString(R.string.restart_notification_app),
-                    if (BuildConfig.FLAVOR_aaos != "carapp") actionActivityPendingIntent else actionCarAppActivityPendingIntent
+                    actionActivityPendingIntent
                 ).build()
             )
             /*
