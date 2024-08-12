@@ -92,7 +92,7 @@ class DataCollector: Service() {
             PendingIntent.getActivity(
                 applicationContext,
                 0,
-                Intent(applicationContext, if (BuildConfig.FLAVOR_aaos != "carapp") MainActivity::class.java else CarAppActivity::class.java),
+                Intent(applicationContext, MainActivity::class.java),
                 PendingIntent.FLAG_IMMUTABLE
             )
         )
