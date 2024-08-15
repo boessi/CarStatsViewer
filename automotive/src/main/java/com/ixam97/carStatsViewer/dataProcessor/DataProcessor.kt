@@ -1,6 +1,8 @@
 package com.ixam97.carStatsViewer.dataProcessor
 
 import android.app.Notification
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.Defines
 import com.ixam97.carStatsViewer.R
@@ -510,7 +512,8 @@ class DataProcessor {
                 InAppLogger.w("WAITING for local session access")
             }
             _localSessionsState.update { localSessions ->
-                localSessions.forEachIndexed { index, session ->
+                val localSessionsCopy = localSessions.toMutableList() // Copying the list before read and write at the same time
+                localSessionsCopy.forEachIndexed { index, session ->
                     val drivingPoints = session.drivingPoints?.toMutableList()
                     drivingPoints?.add(drivingPoint)
                     localSessions[index] = session.copy(last_edited_epoch_time = System.currentTimeMillis())
@@ -582,10 +585,12 @@ class DataProcessor {
             while (!localSessionsAccess) {
                 InAppLogger.w("WAITING for local session access")
             }
-            localSessionsState.value.forEach {localSession ->
+            val localSessions = localSessionsState.value.toMutableList()
+            localSessions.forEach {localSession ->
                 CarStatsViewer.tripDataSource.updateDrivingSession(localSession)
             }
         } catch (e: Exception) {
+            Firebase.crashlytics.recordException(e)
             InAppLogger.e("FATAL ERROR! Writing trips was not successful: ${e.stackTraceToString()}")
         }
     }
