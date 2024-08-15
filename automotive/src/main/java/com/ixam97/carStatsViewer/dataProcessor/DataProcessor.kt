@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
+
 class DataProcessor {
     val carPropertiesData = CarPropertiesData()
 
