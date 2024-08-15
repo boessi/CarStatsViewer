@@ -1,6 +1,8 @@
 package com.ixam97.carStatsViewer.dataProcessor
 
 import android.app.Notification
+import androidx.car.app.model.CarIcon
+import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.ixam97.carStatsViewer.CarStatsViewer
