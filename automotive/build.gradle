@@ -21,8 +21,8 @@ android {
     defaultConfig {
         minSdkVersion 29
         targetSdkVersion 34
-        versionCode 265
-        versionName "0.27.3.0000"
+        versionCode 266
+        versionName "0.27.3.0001"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -112,9 +112,7 @@ dependencies {
     implementation libs.androidx.car.app.automotive
 
     if (mapbox) {
-        // implementation 'org.maplibre.gl:android-sdk:11.1.0'
-        implementation('com.mapbox.maps:android:11.6.0-rc.1')
-        // implementation 'com.mapbox.extension:maps-compose:11.6.0-rc.1'
+        implementation('com.mapbox.maps:android:11.6.0')
     }
 
     implementation libs.androidx.activity.compose

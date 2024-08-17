@@ -1,6 +1,7 @@
 package com.ixam97.carStatsViewer.dataProcessor
 
 import android.app.Notification
+import android.util.Log
 import androidx.car.app.model.CarIcon
 import androidx.core.graphics.drawable.IconCompat
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -142,7 +143,13 @@ class DataProcessor {
             _localSessionsState.update { localSessions ->
                 localSessions.clear()
                 CarStatsViewer.tripDataSource.getActiveDrivingSessionsIds().forEach { sessionId ->
-                    CarStatsViewer.tripDataSource.getFullDrivingSession(sessionId).let { session ->
+                    // CarStatsViewer.tripDataSource.getFullDrivingSession(sessionId).let { session ->
+                    CarStatsViewer.tripDataSource.getDrivingSession(sessionId)?.let { loadedSession ->
+                        val session = loadedSession.copy()
+                        session.drivingPoints = CarStatsViewer.tripDataSource.getDrivingPointsSince(
+                            startTime = loadedSession.start_epoch_time,
+                            limit = Defines.MAIN_VIEW_DRIVING_POINTS
+                        )
                         localSessions.add(session)
                     }
                 }
@@ -517,10 +524,13 @@ class DataProcessor {
             _localSessionsState.update { localSessions ->
                 val localSessionsCopy = localSessions.toMutableList() // Copying the list before read and write at the same time
                 localSessionsCopy.forEachIndexed { index, session ->
-                    val drivingPoints = session.drivingPoints?.toMutableList()
-                    drivingPoints?.add(drivingPoint)
+                    val drivingPoints = session.drivingPoints?.toMutableList()?: mutableListOf()
+                    drivingPoints.add(drivingPoint)
                     localSessions[index] = session.copy(last_edited_epoch_time = System.currentTimeMillis())
-                    localSessions[index].drivingPoints = drivingPoints
+                    localSessions[index].drivingPoints = drivingPoints.drop((drivingPoints.size - Defines.MAIN_VIEW_DRIVING_POINTS).coerceAtLeast(0))
+                    if (session.session_type == CarStatsViewer.appPreferences.mainViewTrip + 1) {
+                        selectedSessionData = localSessions[index]
+                    }
                 }
                 localSessions
             }
@@ -593,8 +603,11 @@ class DataProcessor {
                 CarStatsViewer.tripDataSource.updateDrivingSession(localSession)
             }
         } catch (e: Exception) {
-            Firebase.crashlytics.recordException(e)
             InAppLogger.e("FATAL ERROR! Writing trips was not successful: ${e.stackTraceToString()}")
+            if (CarStatsViewer.appContext.getString(R.string.useFirebase) == "true") {
+                Firebase.crashlytics.log("FATAL ERROR! Writing trips was not successful")
+                Firebase.crashlytics.recordException(e)
+            }
         }
     }
 
@@ -703,8 +716,21 @@ class DataProcessor {
     /** Change the selected trip type to update the trip data flow with */
     fun changeSelectedTrip(tripType: Int? = null) {
         if (localSessionsState.value.isNotEmpty()) {
-            (localSessionsState.value.lastOrNull { it.session_type == (tripType ?: (CarStatsViewer.appPreferences.mainViewTrip + 1)) } ?: localSessionsState.value.firstOrNull())?.let {
-                _selectedSessionDataFlow.value = it
+            try {
+                selectedSessionData = localSessionsState.value.first { it.session_type == tripType }
+                updateTripDataValues()
+            } catch (e: Exception) {
+                val type = when (tripType) {
+                    TripType.MANUAL, TripType.MONTH, TripType.AUTO, TripType.SINCE_CHARGE -> TripType.tripTypesNameMap[tripType]
+                    else -> "Unknown Trip Type!"
+                }
+                if (CarStatsViewer.appContext.getString(R.string.useFirebase) == "true") {
+                    Firebase.crashlytics.log("Error switching trip type! It appears there is no \"$type\".\n${e.message}")
+                    Firebase.crashlytics.recordException(e)
+                } else {
+                    InAppLogger.e("Error switching trip type! It appears there is no \"$type\".\n${e.message}")
+                    InAppLogger.e(e.stackTraceToString())
+                }
             }
         }
      }
