@@ -59,6 +59,13 @@ fun AppearanceSettings(viewModel: SettingsViewModel) {
             Text(text = stringResource(id = R.string.settings_consumption_unit, CarStatsViewer.appPreferences.distanceUnit.unit()))
         }
         Divider(Modifier.padding(horizontal = 20.dp))
+        CarSwitchRow(
+            switchState = viewModel.settingsState.altLayout,
+            onClick = { newState -> viewModel.setAltLayout(newState) }
+        ) {
+            Text(text = stringResource(id = R.string.settings_experimental_layout))
+        }
+        Divider(Modifier.padding(horizontal = 20.dp))
         Text(
             modifier = Modifier
                 .padding(horizontal = 24.dp)

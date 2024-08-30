@@ -30,6 +30,7 @@ class SettingsViewModel: ViewModel() {
         val isInitialized: Boolean = false,
         val detailedNotifications: Boolean = false,
         val altConsumptionUnit: Boolean = false,
+        val altLayout: Boolean = false,
         val showConsumptionGages: Boolean = false,
         val showChargingGages: Boolean = false,
         val locationTracking: Boolean = false,
@@ -64,6 +65,7 @@ class SettingsViewModel: ViewModel() {
                     isInitialized = true,
                     detailedNotifications = preferences.notifications,
                     altConsumptionUnit = preferences.consumptionUnit,
+                    altLayout = preferences.altLayout,
                     showChargingGages = preferences.chargePlotVisibleGages,
                     showConsumptionGages = preferences.chargePlotVisibleGages,
                     locationTracking = preferences.useLocation,
@@ -115,6 +117,10 @@ class SettingsViewModel: ViewModel() {
     fun setAltConsumptionUnit(value: Boolean) {
         settingsState = settingsState.copy(altConsumptionUnit = value)
         preferences.consumptionUnit = value
+    }
+    fun setAltLayout(value: Boolean) {
+        settingsState = settingsState.copy(altLayout = value)
+        preferences.altLayout = value
     }
     fun setShowChargingGages(value: Boolean) {
         settingsState = settingsState.copy(showChargingGages = value)
