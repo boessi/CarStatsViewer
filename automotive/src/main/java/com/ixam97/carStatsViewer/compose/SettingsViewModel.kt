@@ -49,7 +49,7 @@ class SettingsViewModel: ViewModel() {
     private val _finishActivityLiveData = MutableLiveData<Event<Boolean>>()
     val finishActivityLiveData: LiveData<Event<Boolean>> = _finishActivityLiveData
 
-    var isDevEnabled by mutableStateOf(BuildConfig.FLAVOR_version == "dev")
+    var isDevEnabled by mutableStateOf(true)
         private set
 
     var settingsState by mutableStateOf(SettingsState())
