@@ -133,7 +133,11 @@ class HttpLiveData (
             return
         }
 
-        if (!realTimeData.isInitialized()) return
+        if (!realTimeData.isInitialized()) {
+            InAppLogger.w("Real time data is not entirely initialized: ${realTimeData}")
+            connectionStatus = ConnectionStatus.ERROR
+            return
+        }
 
         connectionStatus = try {
             val useLocation = AppPreferences(CarStatsViewer.appContext).httpLiveDataLocation
