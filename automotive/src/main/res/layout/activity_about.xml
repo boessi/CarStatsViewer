@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/about_activity"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?activity_background"
+    android:orientation="vertical"
     tools:context=".ui.activities.AboutActivity">
 
 
@@ -18,121 +18,146 @@
 
         <ImageButton
             android:id="@+id/about_button_back"
-            style="@style/title_back_button_style"/>
+            style="@style/title_back_button_style" />
 
         <TextView
             android:id="@+id/about_title"
             style="@style/title_text_style"
-            android:text="@string/about_title"/>
+            android:text="@string/about_title" />
 
     </LinearLayout>
 
-    <View style="?action_bar_line"/>
+    <View style="?action_bar_line" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:id="@+id/about_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginVertical="10dp">
+            android:layout_marginVertical="10dp"
+            android:orientation="vertical">
 
 
             <TextView
                 style="@style/menu_section_title_style"
-                android:text="@string/about_section_about"/>
-            <View style="@style/menu_divider_style" android:background="?android:attr/listDivider"/>
+                android:text="@string/about_section_about" />
+
+            <View
+                style="@style/menu_divider_style"
+                android:background="?android:attr/listDivider" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_version_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="Version"
                 app:bottomText="Version Number"
-                app:endButtonText="Changelog"/>
+                app:endButtonText="Changelog"
+                app:topText="Version" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="Copyright"
-                app:bottomText="©2022-2023 Maximilian Goldschmidt"/>
+                app:bottomText="©2022-2023 Maximilian Goldschmidt"
+                app:topText="Copyright" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_support_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="@string/about_support"
                 app:bottomText="@string/about_support_description"
-                app:isExternalLink="true"/>
+                app:isExternalLink="true"
+                app:topText="@string/about_support" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_contributors_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="@string/about_contributors"
-                app:bottomText="contributors_list"/>
+                app:bottomText="contributors_list"
+                app:topText="@string/about_contributors" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_translators_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="@string/about_translators"/>
+                app:topText="@string/about_translators" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_supporters_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="@string/about_supporters"/>
+                app:topText="@string/about_supporters" />
 
             <TextView
                 style="@style/menu_section_title_style"
-                android:text="@string/about_section_feedback"/>
-            <View style="@style/menu_divider_style" android:background="?android:attr/listDivider"/>
+                android:text="@string/about_section_system" />
+
+            <View
+                style="@style/menu_divider_style"
+                android:background="?android:attr/listDivider" />
+
+            <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
+                android:id="@+id/about_system_info_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:bottomText="@string/about_system_info_description"
+                app:topText="@string/about_system_info" />
+
+            <TextView
+                style="@style/menu_section_title_style"
+                android:text="@string/about_section_feedback" />
+
+            <View
+                style="@style/menu_divider_style"
+                android:background="?android:attr/listDivider" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_club_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="Polestar Club"
                 app:bottomText="@string/about_polestar_fans_description"
-                app:isExternalLink="true"/>
+                app:isExternalLink="true"
+                app:topText="Polestar Club" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_forums_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="Polestar Forum"
                 app:bottomText="@string/about_polestar_forum_description"
-                app:isExternalLink="true"/>
+                app:isExternalLink="true"
+                app:topText="Polestar Forum" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_github_issues_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="GitHub Issues"
                 app:bottomText="@string/about_github_issues_description"
-                app:isExternalLink="true"/>
+                app:isExternalLink="true"
+                app:topText="GitHub Issues" />
 
             <TextView
                 style="@style/menu_section_title_style"
-                android:text="@string/about_section_misc"/>
-            <View style="@style/menu_divider_style" android:background="?android:attr/listDivider"/>
+                android:text="@string/about_section_misc" />
+
+            <View
+                style="@style/menu_divider_style"
+                android:background="?android:attr/listDivider" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_libs_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="@string/about_third_party_licenses"/>
+                app:topText="@string/about_third_party_licenses" />
 
             <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
                 android:id="@+id/about_privacy_widget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:topText="Privacy"
-                app:isExternalLink="true"/>
+                app:isExternalLink="true"
+                app:topText="Privacy" />
 
         </LinearLayout>
     </ScrollView>

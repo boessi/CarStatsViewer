@@ -322,6 +322,10 @@
     <string name="about_support_description">View the GitHub-repository to learn more about how to support the development of the app.</string>
     <string name="about_contributors">Contributors</string>
     <string name="about_translators">Translators</string>
+    <string name="about_section_system">System:</string>
+    <string name="about_system_info">System Information</string>
+    <string name="about_system_info_title">System Information</string>
+    <string name="about_system_info_description">View system details like RAM, CPU, etc.</string>
     <string name="about_section_feedback">Feedback:</string>
     <string name="about_section_misc">Miscellaneous:</string>
     <string name="about_github_issues_description">This is the best place for bug reports and feature requests. Please read the existing issues before opening a new one.</string>
