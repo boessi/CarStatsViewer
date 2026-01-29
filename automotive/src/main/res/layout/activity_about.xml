@@ -89,6 +89,18 @@
 
             <TextView
                 style="@style/menu_section_title_style"
+                android:text="@string/about_section_system"/>
+            <View style="@style/menu_divider_style" android:background="?android:attr/listDivider"/>
+
+            <com.ixam97.carStatsViewer.ui.views.MenuRowWidget
+                android:id="@+id/about_system_info_widget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:topText="@string/about_system_info"
+                app:bottomText="@string/about_system_info_description"/>
+
+            <TextView
+                style="@style/menu_section_title_style"
                 android:text="@string/about_section_feedback"/>
             <View style="@style/menu_divider_style" android:background="?android:attr/listDivider"/>
 
