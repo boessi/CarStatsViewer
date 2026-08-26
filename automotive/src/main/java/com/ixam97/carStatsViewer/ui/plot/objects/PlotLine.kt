@@ -5,7 +5,7 @@ import com.ixam97.carStatsViewer.ui.plot.enums.PlotDimensionY
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotHighlightMethod
 import com.ixam97.carStatsViewer.ui.plot.enums.PlotLineMarkerType
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.absoluteValue
+import java.util.concurrent.TimeUnit
 
 class PlotLine(
     val Configuration: PlotLineConfiguration,
@@ -30,57 +30,20 @@ class PlotLine(
         else -> dataPoints[dataPoints.size - 1]
     }
 
-    fun addDataPoint(item: Float, epochTime: Long, nanoTime: Long, distance: Float, stateOfCharge: Float, altitude: Float? = null, timeDelta: Long? = null, distanceDelta: Float? = null, stateOfChargeDelta: Float? = null, altitudeDelta: Float? = null, plotLineMarkerType: PlotLineMarkerType? = null, autoMarkerTimeDeltaThreshold: Long? = null): PlotLineItem? {
-        val prev = when (dataPoints[dataPoints.size - 1]?.Marker ?: PlotLineMarkerType.BEGIN_SESSION) {
-            PlotLineMarkerType.BEGIN_SESSION -> dataPoints[dataPoints.size - 1]
-            else -> null
-        }
-
-        return addDataPoint(
-            PlotLineItem(
-            item,
-            epochTime,
-            nanoTime,
-            distance,
-            stateOfCharge,
-            altitude,
-            timeDelta?:(nanoTime - (prev?.NanoTime ?: nanoTime)),
-            distanceDelta?:(distance - (prev?.Distance ?: distance)),
-            stateOfChargeDelta?:(stateOfCharge - (prev?.StateOfCharge ?: stateOfCharge)),
-            altitudeDelta?:(if (altitude == null || prev?.Altitude == null) { null } else { altitude - prev.Altitude!! }),
-            plotLineMarkerType
-        ), autoMarkerTimeDeltaThreshold)
-    }
-
-    fun addDataPoint(dataPoint: PlotLineItem, autoMarkerTimeDeltaThreshold: Long? = null): PlotLineItem? {
+    fun addDataPoint(dataPoint: PlotLineItem): PlotLineItem? {
         val prev = dataPoints[dataPoints.size - 1]
 
         if (dataPoint.Marker == PlotLineMarkerType.BEGIN_SESSION && prev?.Marker == null) {
             prev?.Marker = PlotLineMarkerType.END_SESSION
         }
-        
+
         if (dataPoint.Marker == null && (prev == null || prev.Marker == PlotLineMarkerType.END_SESSION)) {
             dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
         }
 
-        if ((autoMarkerTimeDeltaThreshold ?: dataPoint.TimeDelta ?: 0L) < (dataPoint.TimeDelta ?: 0L)) {
-            prev?.Marker = PlotLineMarkerType.END_SESSION
+        if (prev != null && dataPoint.TimeDelta != null && (dataPoint.EpochTime - prev.EpochTime) > TimeUnit.SECONDS.toMillis(10)) {
+            prev.Marker = PlotLineMarkerType.END_SESSION
             dataPoint.Marker = PlotLineMarkerType.BEGIN_SESSION
-        } else if (prev?.Marker == PlotLineMarkerType.BEGIN_SESSION) {
-            if ((prev.StateOfCharge - dataPoint.StateOfCharge).absoluteValue > 1) {
-                // Car gives an old value for SoC at the end of hibernation. just override that. Bit hacky though...
-                prev.StateOfCharge = dataPoint.StateOfCharge
-                dataPoint.StateOfChargeDelta = 0f
-            }
-            if (prev.Value < dataPoint.Value - 1_000) {
-                prev.Value = dataPoint.Value
-            }
-        }
-
-        if (dataPoint.Marker == PlotLineMarkerType.BEGIN_SESSION) {
-            dataPoint.TimeDelta = 0L
-            dataPoint.DistanceDelta = 0f
-            dataPoint.StateOfChargeDelta = 0f
         }
 
         return when {
@@ -125,21 +88,11 @@ class PlotLine(
     }
 
     private fun combineDataPoints(dataPointLeft: PlotLineItem, dataPointRight: PlotLineItem): PlotLineItem {
-        val newDistanceDelta = (dataPointLeft.DistanceDelta?:0.0f) + (dataPointRight.DistanceDelta?:0.0f)
-
-        // This needs to be changed once we switch to energy instead of consumption as value!!!
-        val newValue = when {
-            (dataPointLeft.DistanceDelta?:0.0f) == 0.0f || (dataPointRight.DistanceDelta?:0.0f) == 0.0f -> 0.0f
-            else -> {
-                ((dataPointLeft.Value * dataPointLeft.DistanceDelta!!) + (dataPointRight.Value * dataPointRight.DistanceDelta!!)) / newDistanceDelta
-            }
-        }
-        return dataPointRight.copy(
+         return dataPointRight.copy(
             TimeDelta = (dataPointLeft.TimeDelta?:0) + (dataPointRight.TimeDelta?:0),
-            DistanceDelta = newDistanceDelta,
+            DistanceDelta = (dataPointLeft.DistanceDelta?:0.0f) + (dataPointRight.DistanceDelta?:0.0f),
             StateOfChargeDelta = (dataPointRight.StateOfCharge - dataPointLeft.StateOfCharge),
-            AltitudeDelta = (dataPointLeft.AltitudeDelta?:0.0f) + (dataPointRight.AltitudeDelta?:0.0f),
-            Value = newValue,
+            Value = dataPointLeft.Value + dataPointRight.Value,
             Marker = when {
                 (dataPointLeft.Marker == PlotLineMarkerType.BEGIN_SESSION || dataPointRight.Marker == PlotLineMarkerType.BEGIN_SESSION) -> PlotLineMarkerType.BEGIN_SESSION
                 (dataPointLeft.Marker == PlotLineMarkerType.END_SESSION || dataPointRight.Marker == PlotLineMarkerType.END_SESSION) -> PlotLineMarkerType.END_SESSION
@@ -245,7 +198,7 @@ class PlotLine(
 
     fun distanceDimensionMinMax(dimension: PlotDimensionX, min: Number?, max: Number?): Float? {
         if (min == null || max == null) return null
-        
+
         return when (dimension) {
             PlotDimensionX.TIME -> (max.toLong() - min.toLong()).toFloat()
             else -> max.toFloat() - min.toFloat()
@@ -370,6 +323,9 @@ class PlotLine(
                     else -> null
                 }
             }
+            PlotHighlightMethod.AVG_BY_VALUE -> {
+                PlotLineItem.byDimensionY(dataPoints, secondaryDimension)
+            }
             else -> null
         }
 
@@ -417,7 +373,8 @@ class PlotLine(
             PlotHighlightMethod.AVG_BY_INDEX,
             PlotHighlightMethod.AVG_BY_DISTANCE,
             PlotHighlightMethod.AVG_BY_TIME,
-            PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE -> averageValue(dataPoints, inlineHighlightMethod, secondaryDimension)
+            PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE,
+            PlotHighlightMethod.AVG_BY_VALUE -> averageValue(dataPoints, inlineHighlightMethod, secondaryDimension)
             else -> null
         }
     }
@@ -438,12 +395,20 @@ class PlotLine(
         )
     }
 
-    fun toPlotLineItemPointCollection(dataPoints: List<PlotLineItem>, dimension: PlotDimensionX, dimensionSmoothing: Float?, min: Number, max: Number): ArrayList<ArrayList<PlotPoint>> {
+    fun toPlotLineItemPointCollection(dataPoints: List<PlotLineItem>, dimension: PlotDimensionX, dimensionY: PlotDimensionY?, dimensionSmoothing: Float?, min: Number, max: Number): ArrayList<ArrayList<PlotPoint>> {
         val result = ArrayList<ArrayList<PlotPoint>>()
         var group = ArrayList<PlotPoint>()
 
         for (index in dataPoints.indices) {
             val item = dataPoints[index]
+
+            if (item.byDimensionY(dimensionY) == null) {
+                if (group.isNotEmpty()) {
+                    result.add(ArrayList(group.sortedBy { it.x }))
+                    group = ArrayList()
+                }
+                continue
+            }
 
             group.add(
                 PlotPoint(

@@ -716,7 +716,7 @@ class PlotView @JvmOverloads constructor(
     private fun toPlotPointCollection(configuration: PlotLineConfiguration, line: PlotLine, dimensionY: PlotDimensionY?, minValue: Float, maxValue: Float, minDimension: Number, maxDimension: Number, maxX: Float, maxY: Float, smoothing: Float?, smoothingPercentage: Float?): ArrayList<ArrayList<PointF>> {
         // val dataPoints = line.getDataPoints(dimension, dimensionRestriction, dimensionShift, true)
         val dataPoints = dataPoints(line)!!
-        val plotLineItemPointCollection = line.toPlotLineItemPointCollection(dataPoints, dimension, smoothing, minDimension, maxDimension)
+        val plotLineItemPointCollection = line.toPlotLineItemPointCollection(dataPoints, dimension, dimensionY, smoothing, minDimension, maxDimension)
 
         val plotPointCollection = ArrayList<ArrayList<PointF>>()
         for (collection in plotLineItemPointCollection) {
@@ -1090,6 +1090,7 @@ class PlotView @JvmOverloads constructor(
                                 PlotHighlightMethod.AVG_BY_DISTANCE,
                                 PlotHighlightMethod.AVG_BY_STATE_OF_CHARGE,
                                 PlotHighlightMethod.AVG_BY_TIME,
+                                PlotHighlightMethod.AVG_BY_VALUE,
                                 PlotHighlightMethod.RAW -> drawYLine(canvas, highlightCordY, maxX, paint.HighlightLabelLine)
                                 else -> {
                                     // Don't draw
@@ -1182,14 +1183,11 @@ class PlotView @JvmOverloads constructor(
     }
 
     private fun timeLabel(time: Long): String {
-        // return when {
-        //     TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS) > 12 -> String.format("%02d:%02d", TimeUnit.DAYS.convert(time, TimeUnit.NANOSECONDS), TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS) % 24)
-        //     TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS) > 30 -> String.format("%02d:%02d'", TimeUnit.HOURS.convert(time, TimeUnit.NANOSECONDS), TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS) % 60)
-        //     else -> String.format("%02d'%02d''", TimeUnit.MINUTES.convert(time, TimeUnit.NANOSECONDS), TimeUnit.SECONDS.convert(time, TimeUnit.NANOSECONDS) % 60)
-        // }
-        return String.format("%02d:%02d",
-            TimeUnit.MILLISECONDS.toHours(time),
-            (TimeUnit.MILLISECONDS.toSeconds(time) / 60f).roundToInt() % TimeUnit.HOURS.toMinutes(1))
+        return when {
+             TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS) > 12 -> String.format("%02d:%02d", TimeUnit.DAYS.convert(time, TimeUnit.MILLISECONDS), TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS) % 24)
+             TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS) > 30 -> String.format("%02d:%02d'", TimeUnit.HOURS.convert(time, TimeUnit.MILLISECONDS), TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS) % 60)
+             else -> String.format("%02d'%02d''", TimeUnit.MINUTES.convert(time, TimeUnit.MILLISECONDS), TimeUnit.SECONDS.convert(time, TimeUnit.MILLISECONDS) % 60)
+        }
     }
 
     private fun label(value: Float, plotLineLabelFormat: PlotLineLabelFormat, plotHighlightMethod: PlotHighlightMethod? = null): String {

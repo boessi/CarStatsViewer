@@ -100,8 +100,8 @@ class PlotMarker (
             null -> value
             0f -> value
             else -> when(dimension) {
-                PlotDimensionX.DISTANCE -> (value as Float / dimensionSmoothing).roundToInt()
-                PlotDimensionX.TIME ->  (value as Long / dimensionSmoothing).roundToInt()
+                PlotDimensionX.DISTANCE -> (value.toFloat() / dimensionSmoothing).roundToInt()
+                PlotDimensionX.TIME ->  (value.toLong() / dimensionSmoothing).roundToInt()
                 else -> value
             }
         }

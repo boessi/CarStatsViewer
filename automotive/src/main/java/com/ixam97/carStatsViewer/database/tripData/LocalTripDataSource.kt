@@ -28,6 +28,10 @@ class LocalTripDataSource(
         }
     }
 
+    override suspend fun getDrivingPointsBetween(epochStart: Long, epochEnd: Long): List<DrivingPoint> {
+        return tripDao.getDrivingPointsBetween(epochStart,epochEnd);
+    }
+
     override suspend fun getLatestDrivingPoint(): DrivingPoint? {
         val drivingPoint = tripDao.getLatestDrivingPoint()
         InAppLogger.v("$TAG retrieved latest driving point: $drivingPoint")
@@ -63,6 +67,7 @@ class LocalTripDataSource(
             used_energy = 0.0,
             driven_distance = 0.0,
             drive_time = 0,
+            trip_time = 0,
             note = "",
             used_soc = 0.0,
             used_soc_energy = 0.0,

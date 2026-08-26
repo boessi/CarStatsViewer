@@ -7,6 +7,8 @@ interface TripDataSource {
      */
     suspend fun addDrivingPoint(drivingPoint: DrivingPoint)
 
+    suspend fun getDrivingPointsBetween(epochStart: Long, epochEnd: Long): List<DrivingPoint>
+
     suspend fun getLatestDrivingPoint(): DrivingPoint?
 
     suspend fun getDrivingPointsSince(startTime: Long, limit: Int): List<DrivingPoint>
