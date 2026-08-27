@@ -181,6 +181,17 @@ class HttpLiveData (
                     deltaData?.traveledDistance,
                     deltaData?.timeSpan,
 
+                    // Battery Health / SoH
+                    batteryStateOfHealth = CarStatsViewer.batteryHealthManager.batteryHealthState.value.stateOfHealthPercent,
+                    batteryUsableCapacityKwh = CarStatsViewer.batteryHealthManager.batteryHealthState.value.usableCapacityKwh,
+                    batteryReferenceCapacityKwh = CarStatsViewer.batteryHealthManager.batteryHealthState.value.referenceCapacityKwh,
+                    batteryDegradationPercent = CarStatsViewer.batteryHealthManager.batteryHealthState.value.degradationPercent,
+                    batteryHealthConfidenceLevel = CarStatsViewer.batteryHealthManager.batteryHealthState.value.confidenceLevel.level,
+                    batteryHealthConfidenceScore = CarStatsViewer.batteryHealthManager.batteryHealthState.value.confidenceScore,
+                    batteryHealthProgressPercent = CarStatsViewer.batteryHealthManager.batteryHealthState.value.progressPercent,
+                    batteryHealthCycleCount = CarStatsViewer.batteryHealthManager.batteryHealthState.value.validCycleCount,
+                    batteryHealthTolerancePercent = CarStatsViewer.batteryHealthManager.batteryHealthState.value.estimatedTolerancePercent,
+
                     deltaData?.drivingPoints
                 )
             )

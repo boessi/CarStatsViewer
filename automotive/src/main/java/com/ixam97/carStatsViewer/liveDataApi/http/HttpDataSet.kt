@@ -40,6 +40,17 @@ data class HttpDataSet(
     val deltaTraveledDistance: Float?,
     val deltaTimeSpan: Long?,
 
+    // Battery Health / SoH
+    val batteryStateOfHealth: Double? = null,
+    val batteryUsableCapacityKwh: Double? = null,
+    val batteryReferenceCapacityKwh: Double? = null,
+    val batteryDegradationPercent: Double? = null,
+    val batteryHealthConfidenceLevel: String? = null,
+    val batteryHealthConfidenceScore: Int? = null,
+    val batteryHealthProgressPercent: Int? = null,
+    val batteryHealthCycleCount: Int? = null,
+    val batteryHealthTolerancePercent: Double? = null,
+
     val drivingPoints: List<DrivingPoint>? = null,
     val chargingSessions: List<ChargingSession>? = null
 )

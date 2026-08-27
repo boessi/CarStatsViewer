@@ -79,6 +79,7 @@ class CarStatsViewer : Application() {
 
         lateinit var tripDatabase: TripDataDatabase
         lateinit var tripDataSource: LocalTripDataSource
+        lateinit var batteryHealthManager: com.ixam97.carStatsViewer.batteryHealth.BatteryHealthManager
         lateinit var dataProcessor: DataProcessor
         lateinit var watchdog: Watchdog
 
@@ -294,6 +295,25 @@ class CarStatsViewer : Application() {
             }
         }
 
+        val MIGRATION_8_9 = object: Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `BatteryHealthRecord` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `epoch_time` INTEGER NOT NULL,
+                        `cycle_type` INTEGER NOT NULL,
+                        `start_soc` REAL NOT NULL,
+                        `end_soc` REAL NOT NULL,
+                        `soc_delta` REAL NOT NULL,
+                        `energy_wh` REAL NOT NULL,
+                        `calculated_capacity_kwh` REAL NOT NULL,
+                        `ambient_temperature` REAL,
+                        `is_valid` INTEGER NOT NULL DEFAULT 1
+                    )
+                """.trimIndent())
+            }
+        }
+
         tripDatabase = Room.databaseBuilder(
             applicationContext,
             TripDataDatabase::class.java,
@@ -303,9 +323,14 @@ class CarStatsViewer : Application() {
             .addMigrations(MIGRATION_5_6)
             .addMigrations(MIGRATION_6_7)
             .addMigrations(MIGRATION_7_8)
+            .addMigrations(MIGRATION_8_9)
             .build()
 
         tripDataSource = LocalTripDataSource(tripDatabase.tripDao())
+        batteryHealthManager = com.ixam97.carStatsViewer.batteryHealth.BatteryHealthManager(
+            tripDatabase.batteryHealthDao(),
+            appPreferences
+        )
 
         CoroutineScope(Dispatchers.IO).launch {
 

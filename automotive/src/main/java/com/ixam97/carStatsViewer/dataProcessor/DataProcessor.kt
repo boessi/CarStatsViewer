@@ -743,6 +743,13 @@ class DataProcessor {
         val drivingSessionsIdsMap = CarStatsViewer.tripDataSource.getActiveDrivingSessionsIdsMap()
         val drivingSessionId = drivingSessionsIdsMap[tripType]
         if (drivingSessionId != null) {
+            try {
+                val sessionToSupersede = CarStatsViewer.tripDataSource.getCompleteDrivingSessionById(drivingSessionId)
+                CarStatsViewer.batteryHealthManager.processDrivingSession(sessionToSupersede)
+            } catch (e: Exception) {
+                InAppLogger.e("[SoH] Error processing trip before supersede: ${e.message}")
+            }
+
             CarStatsViewer.tripDataSource.supersedeDrivingSession(
                 drivingSessionId,
                 System.currentTimeMillis()
@@ -832,6 +839,12 @@ class DataProcessor {
                 localChargingSession = it.copy(end_epoch_time = endTime)
                 localChargingSession?.chargeTime = chargeTimer.getTime()
                 localChargingSession?.chargingPoints = chargingPoints
+
+                try {
+                    CarStatsViewer.batteryHealthManager.processChargingSession(localChargingSession!!)
+                } catch (e: Exception) {
+                    InAppLogger.e("[SoH] Error sending charging session to manager: ${e.message}")
+                }
             }
             _currentChargingSessionDataFlow.value = localChargingSession
             InAppLogger.i("[NEO] Charging session with ID ${localChargingSession?.charging_session_id} ended")

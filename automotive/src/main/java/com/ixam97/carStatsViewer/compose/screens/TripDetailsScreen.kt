@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -26,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.ixam97.carStatsViewer.CarStatsViewer
+import com.ixam97.carStatsViewer.batteryHealth.BatteryHealthConfidence
+import com.ixam97.carStatsViewer.batteryHealth.BatteryHealthState
+import com.ixam97.carStatsViewer.database.batteryHealth.BatteryHealthCycleType
 import com.ixam97.carStatsViewer.R
 import com.ixam97.carStatsViewer.compose.components.CarHeaderWithContent
 import com.ixam97.carStatsViewer.database.tripData.DrivingSession
@@ -74,6 +82,7 @@ fun TripDetailsPortraitScreen(trip: DrivingSession?) {
     ) {
 
         val context = LocalContext.current
+        val batteryHealthState by CarStatsViewer.batteryHealthManager.batteryHealthState.collectAsState()
 
         val consumptionPlotLinePaint = PlotLinePaint(
             PlotPaint.byColor(getColorFromAttribute(context, R.attr.primary_plot_color), CarStatsViewer.appContext.resources.getDimension(R.dimen.reduced_font_size)),
@@ -147,6 +156,19 @@ fun TripDetailsPortraitScreen(trip: DrivingSession?) {
                         color = if (selectedSection == 2) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
                     )
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .clickable { selectedSection = 3 },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = "Battery Health",
+                        style = MaterialTheme.typography.h1,
+                        color = if (selectedSection == 3) MaterialTheme.colors.primary else MaterialTheme.colors.onBackground
+                    )
+                }
             }
         }
         if (trip == null) {
@@ -188,6 +210,9 @@ fun TripDetailsPortraitScreen(trip: DrivingSession?) {
                                 .weight(1f),
                             trip = trip
                         )
+                    }
+                    3 -> {
+                        BatteryHealthSection(batteryHealthState)
                     }
                 }
             }
@@ -369,6 +394,196 @@ private fun disallowIntercept(v: View, event: MotionEvent) {
         }
         MotionEvent.ACTION_UP -> {
             v.parent.requestDisallowInterceptTouchEvent(false)
+        }
+    }
+}
+
+@Composable
+fun BatteryHealthSection(state: BatteryHealthState) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+    ) {
+        // Main Summary Card
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = colorResource(id = R.color.card_background_color),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "State of Health",
+                            style = MaterialTheme.typography.h2,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (state.stateOfHealthPercent != null) "%.1f %%".format(state.stateOfHealthPercent) else "Estimating...",
+                            fontSize = 38.sp,
+                            color = MaterialTheme.colors.primary
+                        )
+                    }
+
+                    // Confidence Badge
+                    val (badgeText, badgeColor) = when (state.confidenceLevel) {
+                        BatteryHealthConfidence.HIGH -> "High Confidence" to Color(0xFF4CAF50)
+                        BatteryHealthConfidence.MEDIUM -> "Medium Confidence" to Color(0xFFFF9800)
+                        BatteryHealthConfidence.LOW -> "Low Confidence" to Color(0xFFFFA726)
+                        BatteryHealthConfidence.INITIAL -> "Calibrating..." to Color(0xFF9E9E9E)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .background(badgeColor.copy(alpha = 0.2f), shape = RoundedCornerShape(8.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = badgeText,
+                            color = badgeColor,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(text = "Usable Capacity", color = colorResource(id = R.color.secondary_text_color), fontSize = 14.sp)
+                        Text(
+                            text = if (state.usableCapacityKwh != null) "%.1f kWh".format(state.usableCapacityKwh) else "-- kWh",
+                            fontSize = 20.sp,
+                            color = Color.White
+                        )
+                    }
+                    Column {
+                        Text(text = "Factory Reference", color = colorResource(id = R.color.secondary_text_color), fontSize = 14.sp)
+                        Text(
+                            text = "%.1f kWh".format(state.referenceCapacityKwh),
+                            fontSize = 20.sp,
+                            color = Color.White
+                        )
+                    }
+                    Column {
+                        Text(text = "Degradation", color = colorResource(id = R.color.secondary_text_color), fontSize = 14.sp)
+                        Text(
+                            text = if (state.degradationPercent != null) "%.1f %%".format(state.degradationPercent) else "--",
+                            fontSize = 20.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Progress Bar
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Learning Progress (%d%%)".format(state.progressPercent),
+                            fontSize = 14.sp,
+                            color = colorResource(id = R.color.secondary_text_color)
+                        )
+                        Text(
+                            text = "%d / 10 Cycles".format(state.validCycleCount),
+                            fontSize = 14.sp,
+                            color = colorResource(id = R.color.secondary_text_color)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .background(Color.DarkGray, shape = RoundedCornerShape(4.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction = (state.progressPercent / 100f).coerceIn(0f, 1f))
+                                .height(8.dp)
+                                .background(MaterialTheme.colors.primary, shape = RoundedCornerShape(4.dp))
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Recorded Cycles (Discharges & Charges)",
+            style = MaterialTheme.typography.h2,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (state.recentRecords.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No qualifying cycles recorded yet. Complete long drives (ΔSoC ≥ 25%) or DC fast charges (ΔSoC ≥ 20%) to build battery health history.",
+                    color = colorResource(id = R.color.secondary_text_color),
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            state.recentRecords.forEach { record ->
+                val typeName = if (record.cycle_type == BatteryHealthCycleType.CHARGE) "DC/AC Charge" else "Drive Discharge"
+                val dateStr = StringFormatters.getDateString(Date(record.epoch_time))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(text = typeName, color = Color.White, fontSize = 16.sp)
+                        Text(
+                            text = "$dateStr • ΔSoC: %.0f%% (%.0f%% → %.0f%%)".format(record.soc_delta, record.start_soc, record.end_soc),
+                            color = colorResource(id = R.color.secondary_text_color),
+                            fontSize = 13.sp
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "%.1f kWh".format(record.calculated_capacity_kwh),
+                            color = MaterialTheme.colors.primary,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "%.1f kWh net".format(record.energy_wh / 1000.0),
+                            color = colorResource(id = R.color.secondary_text_color),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                Divider()
+            }
         }
     }
 }

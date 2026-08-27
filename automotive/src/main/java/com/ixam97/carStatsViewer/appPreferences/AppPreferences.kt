@@ -65,6 +65,9 @@ class AppPreferences(
 
     private val CarAppSelectedRealTimeData = AppPreference<Int>("preference_car_app_selected_real_time_data", 1, sharedPref)
     private val CarAppRealTimeData = AppPreference<Boolean>("preference_car_app_real_time_data", false, sharedPref)
+    private val ReferenceBatteryCapacity = AppPreference<Float>("preference_reference_battery_capacity", 75.0f, sharedPref)
+
+    var referenceBatteryCapacity: Float get() = ReferenceBatteryCapacity.value; set(value) {ReferenceBatteryCapacity.value = value}
 
     var versionString: String get() = VersionString.value; set(value) {VersionString.value = value}
 
