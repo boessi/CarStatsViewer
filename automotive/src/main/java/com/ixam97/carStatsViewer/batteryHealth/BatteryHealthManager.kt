@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
 import kotlin.math.sqrt
@@ -163,10 +164,10 @@ class BatteryHealthManager(
             }
 
             val confidenceScore = when (confidenceLevel) {
-                BatteryHealthConfidence.INITIAL -> (count * 10).coerceAtMost(25)
-                BatteryHealthConfidence.LOW -> (30 + (count - 3) * 10 - relativeSpread.toInt()).coerceIn(26, 55)
-                BatteryHealthConfidence.MEDIUM -> (60 + (count - 6) * 5 - (relativeSpread * 1.5).toInt()).coerceIn(56, 80)
-                BatteryHealthConfidence.HIGH -> (85 + (count - 9) * 3 - relativeSpread.toInt()).coerceIn(81, 100)
+                BatteryHealthConfidence.INITIAL -> min(25, count * 10)
+                BatteryHealthConfidence.LOW -> min(55, max(26, 30 + (count - 3) * 10 - relativeSpread.toInt()))
+                BatteryHealthConfidence.MEDIUM -> min(80, max(56, 60 + (count - 6) * 5 - (relativeSpread * 1.5).toInt()))
+                BatteryHealthConfidence.HIGH -> min(100, max(81, 85 + (count - 9) * 3 - relativeSpread.toInt()))
             }
 
             val tolerancePercent = when (confidenceLevel) {
@@ -177,8 +178,8 @@ class BatteryHealthManager(
             }
 
             val rawSoh = (medianCapacity / refCapacity) * 100.0
-            val sohPercent = roundToOneDecimal(rawSoh.coerceIn(50.0, 105.0))
-            val degradationPercent = roundToOneDecimal((100.0 - sohPercent).coerceAtLeast(0.0))
+            val sohPercent = roundToOneDecimal(min(105.0, max(50.0, rawSoh)))
+            val degradationPercent = roundToOneDecimal(max(0.0, 100.0 - sohPercent))
 
             val recentRecords = batteryHealthDao.getLatestRecords(10)
 
