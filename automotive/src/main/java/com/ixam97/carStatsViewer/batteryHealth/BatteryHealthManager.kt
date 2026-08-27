@@ -1,5 +1,6 @@
 package com.ixam97.carStatsViewer.batteryHealth
 
+import com.ixam97.carStatsViewer.CarStatsViewer
 import com.ixam97.carStatsViewer.appPreferences.AppPreferences
 import com.ixam97.carStatsViewer.database.batteryHealth.BatteryHealthCycleType
 import com.ixam97.carStatsViewer.database.batteryHealth.BatteryHealthDao
