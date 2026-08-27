@@ -744,8 +744,9 @@ class DataProcessor {
         val drivingSessionId = drivingSessionsIdsMap[tripType]
         if (drivingSessionId != null) {
             try {
-                val sessionToSupersede = CarStatsViewer.tripDataSource.getCompleteDrivingSessionById(drivingSessionId)
-                CarStatsViewer.batteryHealthManager.processDrivingSession(sessionToSupersede)
+                CarStatsViewer.tripDataSource.getFullDrivingSession(drivingSessionId)?.let {
+                    CarStatsViewer.batteryHealthManager.processDrivingSession(it)
+                }
             } catch (e: Exception) {
                 InAppLogger.e("[SoH] Error processing trip before supersede: ${e.message}")
             }

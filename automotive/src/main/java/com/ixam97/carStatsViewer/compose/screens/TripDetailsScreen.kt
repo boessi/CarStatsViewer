@@ -411,7 +411,7 @@ fun BatteryHealthSection(state: BatteryHealthState) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = colorResource(id = R.color.card_background_color),
+                    color = colorResource(id = R.color.primary_80),
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(20.dp)

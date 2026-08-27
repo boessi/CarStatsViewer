@@ -61,9 +61,9 @@ class BatteryHealthManager(
                     val record = BatteryHealthRecord(
                         epoch_time = System.currentTimeMillis(),
                         cycle_type = BatteryHealthCycleType.CHARGE,
-                        start_soc = roundToOneDecimal(startSoc * 100f).toFloat(),
-                        end_soc = roundToOneDecimal(endSoc * 100f).toFloat(),
-                        soc_delta = roundToOneDecimal(socGain * 100f).toFloat(),
+                        start_soc = roundToOneDecimal(startSoc * 100f),
+                        end_soc = roundToOneDecimal(endSoc * 100f),
+                        soc_delta = roundToOneDecimal(socGain * 100f),
                         energy_wh = chargedEnergyWh,
                         calculated_capacity_kwh = roundToOneDecimal(capacityKwh),
                         ambient_temperature = chargingSession.outside_temp,
@@ -102,12 +102,12 @@ class BatteryHealthManager(
                     val record = BatteryHealthRecord(
                         epoch_time = System.currentTimeMillis(),
                         cycle_type = BatteryHealthCycleType.DRIVE,
-                        start_soc = roundToOneDecimal(startSoc * 100f).toFloat(),
-                        end_soc = roundToOneDecimal(endSoc * 100f).toFloat(),
-                        soc_delta = roundToOneDecimal(socLoss * 100f).toFloat(),
+                        start_soc = roundToOneDecimal(startSoc * 100f),
+                        end_soc = roundToOneDecimal(endSoc * 100f),
+                        soc_delta = roundToOneDecimal(socLoss * 100f),
                         energy_wh = usedEnergyWh,
                         calculated_capacity_kwh = roundToOneDecimal(capacityKwh),
-                        ambient_temperature = drivingPoints.lastOrNull()?.ambient_temperature,
+                        ambient_temperature = CarStatsViewer.dataProcessor.realTimeData.ambientTemperature,
                         is_valid = true
                     )
                     batteryHealthDao.insertRecord(record)
@@ -205,5 +205,9 @@ class BatteryHealthManager(
 
     private fun roundToOneDecimal(value: Double): Double {
         return round(value * 10.0) / 10.0
+    }
+
+    private fun roundToOneDecimal(value: Float): Float {
+        return round(value * 10.0f) / 10.0f
     }
 }
